@@ -1,0 +1,14 @@
+fastapi
+uvicorn[standard]
+# includes watchgod and python-dotenv
+torch
+numpy
+cython
+torchvision
+detectron2
+pillow  # For image handling
+python-multipart  # For handling file uploads
+
+# pip install torch==2.1.0+cpu torchvision==0.15.0+cpu torchaudio==2.1.0+cpu
+
+# pip install torch torchvision torchaudio
