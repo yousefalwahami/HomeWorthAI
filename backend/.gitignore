@@ -2,3 +2,8 @@
 backend/venv/Lib/site-packages/torch/lib/dnnl.lib
 backend/venv/Lib/site-packages/torch/lib/torch_cpu.dll
 venv/
+
+__pycache__/
+*.pyc
+*.pyo
+controllers/__pycache__/
