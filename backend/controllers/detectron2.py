@@ -16,10 +16,10 @@ COCO_CLASSES = metadata.thing_classes
 print(metadata.thing_classes)  # This will print out the class names
 
 
-print(torch.__version__)
-print(torch.cuda.is_available())  # Should print False if it's CPU-only
-#print(torch.device(get_cfg.MODEL.DEVICE))
-print(torch.device)
+# print(torch.__version__)
+# print(torch.cuda.is_available())  # Should print False if it's CPU-only
+# #print(torch.device(get_cfg.MODEL.DEVICE))
+# print(torch.device)
 
 
 # Initialize the Detectron2 model

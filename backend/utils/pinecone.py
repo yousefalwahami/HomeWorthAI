@@ -39,8 +39,6 @@ index = pc.Index(index_name)
 
 # Query the index to check the inserted vectors
 result = index.describe_index_stats()
-print(json.dumps(result, indent=4))
-
 
 def extract_insights_from_chatlog(chatlog_content):
     # Use Llama-3.3-70B-Instruct to extract entities and context
