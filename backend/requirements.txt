@@ -1,14 +1,11 @@
 fastapi
-uvicorn[standard]
-# includes watchgod and python-dotenv
+uvicorn[standard] # includes watchgod and python-dotenv
 torch
+torchvision
+torchaudio
 numpy
 cython
-torchvision
-# detectron2
-pillow  # For image handling
-python-multipart  # For handling file uploads
+## detectron2
+pillow
+python-multipart
 
-# pip install torch==2.1.0+cpu torchvision==0.15.0+cpu torchaudio==2.1.0+cpu
-
-# pip install torch torchvision torchaudio
