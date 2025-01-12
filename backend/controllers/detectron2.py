@@ -13,10 +13,8 @@ from detectron2.data import MetadataCatalog
 metadata = MetadataCatalog.get("coco_2017_val")
 COCO_CLASSES = metadata.thing_classes
 print(metadata.thing_classes)  # This will print out the class names
-#print(metadata)  # This will print out the class names
 
 
-# cfg.MODEL.DEVICE = "cpu"
 print(torch.__version__)
 print(torch.cuda.is_available())  # Should print False if it's CPU-only
 #print(torch.device(get_cfg.MODEL.DEVICE))

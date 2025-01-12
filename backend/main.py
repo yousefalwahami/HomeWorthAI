@@ -1,6 +1,5 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from controllers.items import router as items_router
 from controllers.detectron2 import router as detectron2_router
 
 app = FastAPI()
@@ -25,7 +24,6 @@ app.add_middleware(
   allow_headers=["*"],
 )
 
-app.include_router(items_router, prefix="/api", tags=["items"])
 # tag parameter helps group the routes for better documentation in the Swagger UI
 app.include_router(detectron2_router, prefix="/api", tags=["detectron2"])
 
