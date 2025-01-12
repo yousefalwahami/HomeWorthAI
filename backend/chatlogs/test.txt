@@ -1,0 +1,17 @@
+[2023-12-01 09:15:23] John: Hey, did you grab my laptop from the living room?  
+[2023-12-01 09:16:02] Mary: No, but I saw it near the coffee table.  
+
+[2023-12-01 09:18:45] John: I think I left my phone on the kitchen counter last night.  
+[2023-12-01 09:19:12] Mary: Oh yeah, it was next to the toaster.  
+
+[2023-12-01 09:22:30] John: By the way, did we move the vacuum cleaner to the basement?  
+[2023-12-01 09:23:01] Mary: Yes, it’s near the water heater.  
+
+[2023-12-01 09:25:14] John: And what about the keys for the garage?  
+[2023-12-01 09:25:35] Mary: They’re probably in the drawer under the TV in the living room.  
+
+[2023-12-01 09:28:47] John: I couldn’t find my sunglasses yesterday. Were they on the dining table?  
+[2023-12-01 09:29:10] Mary: I think so, but I moved them to the bookshelf.  
+
+[2023-12-01 09:32:03] John: Let’s not forget the box of old photo albums in the attic.  
+[2023-12-01 09:32:25] Mary: Agreed, we should bring them downstairs soon.

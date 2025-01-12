@@ -1,3 +1,4 @@
+import os
 from fastapi import APIRouter, File, UploadFile
 from fastapi.responses import StreamingResponse
 from io import BytesIO
@@ -7,8 +8,8 @@ from detectron2.engine import DefaultPredictor
 from detectron2.config import get_cfg
 from detectron2 import model_zoo
 from PIL import Image, ImageDraw
-
 from detectron2.data import MetadataCatalog
+
 # Access COCO metadata
 metadata = MetadataCatalog.get("coco_2017_val")
 COCO_CLASSES = metadata.thing_classes

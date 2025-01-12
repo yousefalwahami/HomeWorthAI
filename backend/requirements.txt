@@ -8,4 +8,6 @@ cython
 ## detectron2
 pillow
 python-multipart
-
+openai
+sentence_transformers
+python-dotenv
