@@ -1,6 +1,16 @@
 # HomeWorthAI
 nosu ai hackathon
 
+# Intalling virtual environment
+
+### Commands
+
+python3 -m venv venv
+source venv/bin/activate
+export MACOSX_DEPLOYMENT_TARGET=10.13
+source /Users/avnoorludhar/Desktop/computer\ sceince/HackathonForInsurance/HomeWorthAI/backend/venv/bin/activate
+/Applications/Python\ 3.11/Install\ Certificates.command
+
 
 # Installing detectron2
 > **Note:** We are installing for the CPU, install CUDA if you want GPU support.
