@@ -7,3 +7,6 @@ __pycache__/
 *.pyc
 *.pyo
 controllers/__pycache__/
+
+extracted_files/
+uploaded_backups/
