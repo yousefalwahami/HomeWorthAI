@@ -5,7 +5,7 @@ torch
 numpy
 cython
 torchvision
-detectron2
+# detectron2
 pillow  # For image handling
 python-multipart  # For handling file uploads
 
