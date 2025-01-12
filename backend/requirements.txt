@@ -8,6 +8,11 @@ cython
 ## detectron2
 pillow
 python-multipart
-openai
-sentence_transformers
 python-dotenv
+requests
+openai
+sqlite3
+
+# installation for bert
+transformers
+sentence-transformers
