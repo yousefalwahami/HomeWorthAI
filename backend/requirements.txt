@@ -11,3 +11,4 @@ python-multipart
 openai
 sentence_transformers
 python-dotenv
+pinecone
