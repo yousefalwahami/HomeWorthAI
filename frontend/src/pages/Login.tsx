@@ -24,7 +24,8 @@ type formData = {
 }
 
 type responseData = {
-  email: string
+  email: string,
+  token: string
 }
 
 type ErrorResponse = {
@@ -49,7 +50,7 @@ function Login(): JSX.Element {
       const response: AxiosResponse = await api.post('/api/user/login', formInput);
       const dataFromAPI: responseData = response.data;
       
-      dispatch(addUser({email: dataFromAPI.email, token: ''}));// no need to store the token in redux
+      dispatch(addUser({email: dataFromAPI.email, token: dataFromAPI.token}));// no need to store the token in redux
       setEmail('');
       setPassword('');
       setError(null);

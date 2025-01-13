@@ -19,12 +19,14 @@ import api from "@/lib/axios";
   
 type formData = {
     email: string,
+    username: string,
     password: string,
     passwordConfirm: string
 }
 
 type responseData = {
-    email: string
+    email: string,
+    token: string
 }
 
 type ErrorResponse = {
@@ -35,6 +37,7 @@ function SignUp(): JSX.Element {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [passwordConfirm , setPasswordConfirm] = useState("");
+    const [username, setUsername] = useState("");
     const [error, setError] = useState<string | null>(null);
     const navigate: NavigateFunction = useNavigate();
     const dispatch = useAppDispatch();
@@ -46,12 +49,12 @@ function SignUp(): JSX.Element {
 
     const handleClick = async () =>{
         try{
-            const formInput:formData = {email: email, password: password, passwordConfirm: passwordConfirm};
+            const formInput:formData = {email: email, username: username, password: password, passwordConfirm: passwordConfirm};
 
             const response: AxiosResponse = await api.post('/api/user/register', formInput);
             const dataFromAPI: responseData = response.data;
             
-            dispatch(addUser({email: dataFromAPI.email, token: ''}));// no need to store the token in redux
+            dispatch(addUser({email: dataFromAPI.email, token: dataFromAPI.token}));// no need to store the token in redux
             setEmail('');
             setPassword('');
             setError(null);
@@ -88,6 +91,12 @@ function SignUp(): JSX.Element {
                             Email
                         </Label>
                         <Input id="email" onChange={e => setEmail(e.target.value)} onKeyDown={handleKeyDown} type="email" placeholder="m@example.com" value={email}/>
+                    </div>
+                    <div className="flex flex-col items-start space-y-2">
+                        <Label htmlFor="username" >
+                            Username
+                        </Label>
+                        <Input id="email" onChange={e => setUsername(e.target.value)} onKeyDown={handleKeyDown} type="username" placeholder="username" value={username}/>
                     </div>
                     <div className="flex flex-col items-start space-y-2">
                         <Label htmlFor="password" >
