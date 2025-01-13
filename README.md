@@ -1,6 +1,11 @@
 # HomeWorthAI
 nosu ai hackathon
 
+# Frontend
+
+`npm install` to install dependencies and `npm run dev` to start the frontend
+
+
 # Intalling virtual environment
 
 ### Commands
