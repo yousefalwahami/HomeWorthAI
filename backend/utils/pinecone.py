@@ -43,7 +43,7 @@ result = index.describe_index_stats()
 def extract_insights_from_chatlog(chatlog_content):
     # Use Llama-3.3-70B-Instruct to extract entities and context
     completion = client.chat.completions.create(
-        model="meta-llama/Meta-Llama-3.1-8B-Instruct",
+        model="meta-llama/Meta-Llama-3.1-8B-Instruct-fast",
         messages=[
             {
                 "role": "system",

@@ -15,7 +15,6 @@ client = OpenAI(
   base_url="https://api.studio.nebius.ai/v1/",
   api_key=os.environ.get("NEBIUS_API_KEY")  # Ensure your API key is set in the environment
 )
-print(client.api_key)
 
 # Route for sending a prompt to the model
 @router.post("/nebius-chat")
