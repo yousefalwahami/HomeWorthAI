@@ -10,3 +10,11 @@ controllers/__pycache__/
 
 extracted_files/
 uploaded_backups/
+
+Manifest.db
+Manifest.db-shm
+Manifest.db-wal
+
+sms.db
+
+temp.plist
