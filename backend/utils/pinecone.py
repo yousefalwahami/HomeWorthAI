@@ -79,6 +79,7 @@ def extract_insights_from_chatlog(chatlog_content):
         messages.append(content[i+2].strip())
     
     dict_item_context = {
+        "ids": [],
         "items": items,
         "context": context,
         "messages": messages
@@ -110,7 +111,7 @@ def generate_embeddings(dict_item_context):
     # embeddings = model.encode([item + ' ' + context for (item, context) in zip(dict_item_context["items"], dict_item_context["context"])], convert_to_tensor=False)  # Set convert_to_tensor=False to return NumPy arrays
     # return embeddings
 
-def store_embeddings_in_pinecone(dict_item_context, embeddings, filename):
+def store_embeddings_in_pinecone(dict_item_context, embeddings, chat_id, file):
     """
     Stores embeddings in Pinecone with metadata.
 
@@ -121,9 +122,11 @@ def store_embeddings_in_pinecone(dict_item_context, embeddings, filename):
     """
     pinecone_data = [
         {
-            "id": f"{filename}_item_{i}",  # Unique ID for each item-context pair
+            "id": file + '_' + str(dict_item_context["ids"][i]),
             "values": embedding.tolist(),  # Convert NumPy array to list
             "metadata": {
+                "chat_id": chat_id,
+                "message_id": dict_item_context["ids"][i],
                 "item": dict_item_context["items"][i],
                 "context": dict_item_context["context"][i],
                 "message": dict_item_context["messages"][i]
