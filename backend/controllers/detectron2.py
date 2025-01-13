@@ -11,17 +11,11 @@ from PIL import Image, ImageDraw
 from detectron2.data import MetadataCatalog
 from transformers import CLIPProcessor, CLIPModel
 from database.database import get_connection
-from psycopg2 import sql
 from datetime import datetime
-
-conn = get_connection()
-cursor = conn.cursor()
 
 # Access COCO metadata
 metadata = MetadataCatalog.get("coco_2017_val")
 COCO_CLASSES = metadata.thing_classes
-print(metadata.thing_classes)  # This will print out the class names
-
 
 # print(torch.__version__)
 # print(torch.cuda.is_available())  # Should print False if it's CPU-only
@@ -42,6 +36,38 @@ clip_model = CLIPModel.from_pretrained("openai/clip-vit-base-patch32")
 clip_processor = CLIPProcessor.from_pretrained("openai/clip-vit-base-patch32")
 
 router = APIRouter()
+
+def save_image_to_db(user_id, filename, items, image_data):
+  conn = get_connection()
+  cursor = conn.cursor()
+
+  try:
+    query = f"""
+      INSERT INTO images (user_id, filename, items, image_data, uploaded_at)
+      VALUES (%s, %s, %s, %s, %s)
+    """
+
+    # Execute the query with the parameters
+    cursor.execute(query, (user_id, filename, items, image_data, datetime.now()))
+
+    # Commit the transaction
+    conn.commit()
+
+    # Close the cursor and connection
+    cursor.close()
+    conn.close()
+
+    print(f"Image '{filename}' uploaded successfully!")
+
+  except Exception as e:
+    print("Error saving image to DB:", e)
+  
+  finally:
+        # Ensure the cursor and connection are closed properly
+        if cursor:
+            cursor.close()
+        if conn:
+            conn.close()
 
 @router.post("/detect_objects")
 async def detect_objects(file: UploadFile = File(...)):
@@ -107,14 +133,12 @@ async def detect_objects(file: UploadFile = File(...)):
   # TODO: Store results in a vector database (e.g., Pinecone) here
   # You can use the 'results' dictionary to upload both embeddings and metadata
 
-  '''
   save_image_to_db(
     user_id=1,  # You should dynamically determine the user ID
     filename=file.filename,
     items=items,
     image_data=image_bytes  # Directly use image bytes here
   )
-  '''
 
   return {"detections": results}
 
@@ -129,33 +153,6 @@ async def detect_objects(file: UploadFile = File(...)):
   
   return StreamingResponse(img_byte_arr, media_type="image/png")
   '''
-
-def save_image_to_db(user_id, filename, items, image_data):
-  try:
-    # Get database connection
-    conn = get_connection()
-    cursor = conn.cursor()
-
-    # Prepare SQL query to insert the image data
-    query = sql.SQL("""
-      INSERT INTO images (user_id, filename, items, image_data, uploaded_at)
-      VALUES (%s, %s, %s, %s, %s)
-    """)
-
-    # Execute the query with the parameters
-    cursor.execute(query, (user_id, filename, items, image_data, datetime.now()))
-
-    # Commit the transaction
-    conn.commit()
-
-    # Close the cursor and connection
-    cursor.close()
-    conn.close()
-
-    print(f"Image '{filename}' uploaded successfully!")
-
-  except Exception as e:
-    print("Error saving image to DB:", e)
 
 
   
