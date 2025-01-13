@@ -3,7 +3,7 @@ from fastapi import APIRouter, File, UploadFile
 from fastapi.responses import StreamingResponse
 from io import BytesIO
 import torch
-import numpy as np  # Import numpy
+import numpy as np
 from detectron2.engine import DefaultPredictor
 from detectron2.config import get_cfg
 from detectron2 import model_zoo
@@ -11,7 +11,6 @@ from PIL import Image, ImageDraw
 from detectron2.data import MetadataCatalog
 from transformers import CLIPProcessor, CLIPModel
 from database.database import get_connection
-import psycopg2
 from psycopg2 import sql
 from datetime import datetime
 

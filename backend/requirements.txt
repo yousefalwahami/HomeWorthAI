@@ -12,6 +12,7 @@ python-dotenv
 requests
 openai
 sqlite3
+re
 
 # installation for embeddings
 transformers
