@@ -16,5 +16,7 @@ Manifest.db-shm
 Manifest.db-wal
 
 sms.db
+sms.db-shm
+sms.db-wal
 
 temp.plist
