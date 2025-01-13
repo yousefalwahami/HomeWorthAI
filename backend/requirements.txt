@@ -13,7 +13,7 @@ requests
 openai
 sqlite3
 
-# installation for bert
+# installation for embeddings
 transformers
 sentence-transformers
 pinecone

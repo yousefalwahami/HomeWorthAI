@@ -5,6 +5,7 @@ from controllers.chatLogProcessing import router as chatlog_upload_router
 from controllers.bert import router as bert_router
 from controllers.nebius import router as nebius_router
 from controllers.upload_backup import router as upload_backup_router
+from database.database import get_connection
 
 app = FastAPI()
 '''
@@ -35,6 +36,8 @@ app.include_router(bert_router, prefix="/api", tags=["bert"])
 app.include_router(nebius_router, prefix="/api", tags=["nebius"])
 app.include_router(upload_backup_router, prefix="/api", tags=["files"])
 
+conn = get_connection()
+cursor = conn.cursor()
 
 
 @app.get("/")

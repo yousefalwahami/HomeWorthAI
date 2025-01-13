@@ -18,7 +18,7 @@ CREATE TABLE messages (
     message_id SERIAL PRIMARY KEY,
     chat_id INT REFERENCES chat_logs(chat_id),
     sender VARCHAR(100) NOT NULL,
-    receiver VARCHAR(100) NOTE NULL,
+    receiver VARCHAR(100) NOT NULL,
     message TEXT NOT NULL,
     timestamp TIMESTAMP DEFAULT NOW()
 );

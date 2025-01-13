@@ -1,6 +1,8 @@
 import json
 from openai import OpenAI
 from sentence_transformers import SentenceTransformer
+import torch
+from transformers import CLIPModel, CLIPProcessor
 import os
 from dotenv import load_dotenv
 from pinecone import Pinecone, ServerlessSpec
@@ -13,20 +15,25 @@ client = OpenAI(
     api_key=os.environ.get("NEBIUS_API_KEY")
 )
 
-model = SentenceTransformer('all-MiniLM-L6-v2')  # You can replace this with another model if needed
+# model = SentenceTransformer('all-MiniLM-L6-v2')  # You can replace this with another model if needed
+
+# Initialize CLIP for text embeddings
+clip_model = CLIPModel.from_pretrained("openai/clip-vit-base-patch32")
+clip_processor = CLIPProcessor.from_pretrained("openai/clip-vit-base-patch32")
 
 
 # Initialize Pinecone
 pc = Pinecone(api_key=os.environ.get("PINECONE_API_KEY"))
 
 # Define index name
-index_name = "item-context-embeddings"
+index_name = "item-context-embeddings-512"
 
 # Create the index if it doesn't exist
 if index_name not in pc.list_indexes().names():
     pc.create_index(
         name=index_name,
-        dimension=384,  # Embedding dimension for 'all-MiniLM-L6-v2'
+        # dimension=384,  # Embedding dimension for 'all-MiniLM-L6-v2'
+        dimension=512,  # Embedding dimension for 'CLIP ViT b3'
         spec=ServerlessSpec(
             cloud="aws",  # Specify your cloud provider
             region="us-east-1"  # Specify your region
@@ -44,6 +51,7 @@ def extract_insights_from_chatlog(chatlog_content):
     # Use Llama-3.3-70B-Instruct to extract entities and context
     completion = client.chat.completions.create(
         model="meta-llama/Meta-Llama-3.1-8B-Instruct-fast",
+        # change model to CLIP
         messages=[
             {
                 "role": "system",
@@ -88,8 +96,19 @@ def generate_embeddings(dict_item_context):
     Returns:
         list of numpy.ndarray: Embeddings for each insight.
     """
-    embeddings = model.encode([item + ' ' + context for (item, context) in zip(dict_item_context["items"], dict_item_context["context"])], convert_to_tensor=False)  # Set convert_to_tensor=False to return NumPy arrays
-    return embeddings
+    # Prepare text input for CLIP (item + context)
+    texts = [item + ' ' + context for item, context in zip(dict_item_context["items"], dict_item_context["context"])]
+    
+    # Process the text using CLIPProcessor
+    inputs = clip_processor(text=texts, return_tensors="pt", padding=True, truncation=True)
+    
+    # Generate text embeddings using CLIPModel
+    with torch.no_grad():
+        text_embeddings = clip_model.get_text_features(**inputs)
+
+    return text_embeddings
+    # embeddings = model.encode([item + ' ' + context for (item, context) in zip(dict_item_context["items"], dict_item_context["context"])], convert_to_tensor=False)  # Set convert_to_tensor=False to return NumPy arrays
+    # return embeddings
 
 def store_embeddings_in_pinecone(dict_item_context, embeddings, filename):
     """

@@ -1,7 +1,7 @@
 import os
 import zipfile
 import sqlite3
-import tempfile
+import io
 from fastapi import APIRouter, File, UploadFile, HTTPException
 from typing import List
 from datetime import datetime
@@ -14,49 +14,49 @@ os.makedirs(UPLOAD_DIR, exist_ok=True)
 os.makedirs(EXTRACT_DIR, exist_ok=True)
 
 
-def extract_chat_db_from_backup(backup_path: str) -> str:
+async def extract_chat_db_from_backup(file: UploadFile) -> str:
   """
-  Extract chat.db from an iOS backup file.
+  Extract chat.db from an iOS backup file without saving it to disk.
   """
 
-  backup_extract_path = os.path.join(EXTRACT_DIR, os.path.basename(backup_path))
-  os.makedirs(backup_extract_path, exist_ok=True)  # Ensure the directory exists
+  # Read the file into memory
+  zip_file = zipfile.ZipFile(io.BytesIO(await file.read()), "r")
+  
+  # List all files in the zip
+  zip_files = zip_file.infolist()
 
-  # Create a temporary directory for extraction
-  #with tempfile.TemporaryDirectory() as backup_extract_path:
-  with zipfile.ZipFile(backup_path, "r") as zip_ref:
-    zip_ref.extractall(backup_extract_path)
+  # Find Manifest.db and chat.db files inside the zip
+  manifest_db_path = None
+  chat_db_path = None
 
-  # Locate the Manifest.db file
-  manifest_db_path = os.path.join(backup_extract_path, "Manifest.db")
-  if not os.path.exists(manifest_db_path):
-    raise HTTPException(status_code=400, detail="Manifest.db not found in backup.")
+  for zip_file_info in zip_files:
+    if 'Manifest.db' in zip_file_info.filename:
+      manifest_db_path = zip_file_info.filename
+    elif 'Library/Messages/chat.db' in zip_file_info.filename:
+      chat_db_path = zip_file_info.filename
 
-  # Connect to Manifest.db to find chat.db
-  conn = sqlite3.connect(manifest_db_path)
-  cursor = conn.cursor()
-  query = """
-  SELECT fileID
-  FROM Files
-  WHERE relativePath LIKE '%Library/Messages/chat.db'
-  """
-  cursor.execute(query)
-  result = cursor.fetchone()
-  conn.close()
+  if not manifest_db_path or not chat_db_path:
+    raise HTTPException(status_code=400, detail="Required files not found in backup.")
 
-  if not result:
-    raise HTTPException(status_code=400, detail="chat.db not found in backup.")
+  # Extract only the needed files (Manifest.db and chat.db)
+  manifest_db_file = zip_file.read(manifest_db_path)
+  chat_db_file = zip_file.read(chat_db_path)
 
-  # Get the fileID of chat.db and locate it
-  file_id = result[0]
-  chat_db_path = os.path.join(backup_extract_path, file_id[:2], file_id)
+  # Now, we have Manifest.db and chat.db files as in-memory bytes
+  # Create a temporary directory to store them for processing
+  backup_extract_path = os.path.join(EXTRACT_DIR, "temp_extracted")
+  os.makedirs(backup_extract_path, exist_ok=True)
 
-  print(f"Extracted chat.db path: {chat_db_path}")
+  # Save files to temporary directory
+  with open(os.path.join(backup_extract_path, "Manifest.db"), "wb") as f:
+    f.write(manifest_db_file)
 
-  if not os.path.exists(chat_db_path):
-    raise HTTPException(status_code=400, detail="chat.db file is missing in backup.")
+  with open(os.path.join(backup_extract_path, "chat.db"), "wb") as f:
+    f.write(chat_db_file)
 
-  return chat_db_path
+  # Return the path of chat.db to extract chat logs
+  extracted_chat_db = os.path.join(backup_extract_path, "chat.db")
+  return extracted_chat_db
 
 
 def extract_imessages(db_path: str) -> List[dict]:
@@ -73,7 +73,11 @@ def extract_imessages(db_path: str) -> List[dict]:
         message.date / 1000000000 + 978307200 AS timestamp,
         message.text AS message_text,
         handle.id AS sender,
-        chat.chat_identifier AS chat_id
+        handle.display_name AS sender_name,
+        /* attachment.filename AS attachment_filename,
+        attachment.mime_type AS attachment_type */
+        chat.chat_identifier AS chat_id,
+        chat.display_name AS chat_name
       FROM
         message
       LEFT JOIN
@@ -82,8 +86,12 @@ def extract_imessages(db_path: str) -> List[dict]:
         chat_message_join ON message.ROWID = chat_message_join.message_id
       LEFT JOIN
         chat ON chat.ROWID = chat_message_join.chat_id
+      /* LEFT JOIN
+        attachment ON attachment.message_id = message.ROWID
+        */
       WHERE
         message.text IS NOT NULL
+        /* attachment.filename IS NOT NULL */
       ORDER BY
         timestamp DESC
       """
@@ -95,12 +103,13 @@ def extract_imessages(db_path: str) -> List[dict]:
         {
           "timestamp": datetime.fromtimestamp(row[0]).strftime("%Y-%m-%d %H:%M:%S"),
           "message": row[1],
-          "sender": row[2],
-          "chat_id": row[3],
+          "sender": row[4] if row[4] else row[2],  # If sender has a name, use it, otherwise fallback to ID
+          "chat_name": row[5] if row[5] else row[3],  # If chat has a name, use it, otherwise fallback to ID
         }
         for row in rows
       ]
     return messages
+    # return { "Done processing all messages" }
 
   except sqlite3.Error as e:
     raise HTTPException(status_code=500, detail=f"Database error: {e}")
@@ -114,14 +123,17 @@ async def upload_backup(file: UploadFile = File(...)):
   if not file.filename.endswith(".zip"):
     raise HTTPException(status_code=400, detail="Only .zip backup files are allowed.")
 
+  '''
   # Save the uploaded file
   backup_path = os.path.join(UPLOAD_DIR, file.filename)
   with open(backup_path, "wb") as f:
     f.write(await file.read())
+  '''
 
   try:
     # Extract chat.db from the backup
-    chat_db_path = extract_chat_db_from_backup(backup_path)
+    # chat_db_path = extract_chat_db_from_backup(backup_path)
+    chat_db_path = await extract_chat_db_from_backup(file)
 
     # Extract chat logs from chat.db
     messages = extract_imessages(chat_db_path)
@@ -132,5 +144,8 @@ async def upload_backup(file: UploadFile = File(...)):
 
   finally:
     # Clean up uploaded and extracted files
-    if os.path.exists(backup_path):
-      os.remove(backup_path)
+    #if os.path.exists(backup_path):
+      #os.remove(backup_path)
+
+    # Clean up extracted files (if necessary, in-memory cleanup can be added here)
+    pass
