@@ -46,7 +46,6 @@ function Login(): JSX.Element {
   const handleClick = async () =>{
     try{
       const formInput:formData = {email: email, password: password};
-      console.log("Boom");
       const response: AxiosResponse = await api.post('/api/user/login', formInput);
       const dataFromAPI: responseData = response.data;
       
@@ -60,7 +59,7 @@ function Login(): JSX.Element {
         const newError = err as AxiosError<ErrorResponse>;
         setError(newError.response?.data?.error ?? 'Unknown error');
       }else{
-        console.log("idk");
+        console.log("Non-Axios error, most likely internal server error.");
       }
     }
   }

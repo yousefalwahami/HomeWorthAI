@@ -14,16 +14,16 @@ const initialState:UserState = {
 };
 
 export const UserSlice = createSlice({
-  name: "user",
-  initialState,
-  reducers: {
-    addUser: (state, action: PayloadAction<{email: string, token: string}>) =>{
-      state.user = action.payload;
-    },
-    removeUser: (state)=>{
-      state.user = null;
+    name: "user",
+    initialState,
+    reducers: {
+        addUser: (state, action: PayloadAction<{email: string, token: string}>) =>{
+            state.user = action.payload;
+        },
+        removeUser: (state)=>{
+            state.user = null;
+        }
     }
-  }
 })
 
 export default UserSlice.reducer;
