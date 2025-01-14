@@ -25,7 +25,8 @@ type formData = {
 
 type responseData = {
   email: string,
-  token: string
+  token: string,
+  user_id: number
 }
 
 type ErrorResponse = {
@@ -56,9 +57,11 @@ function Login(): JSX.Element {
       const formInput:formData = {email: email, password: password};
       const response: AxiosResponse = await api.post('/api/user/login', formInput);
       const dataFromAPI: responseData = response.data;
-      const { token } = response.data;
+      const { token, user_id } = response.data;
+      console.log(response.data);
+      console.log(dataFromAPI);
       localStorage.setItem("token", token);
-      console.log('dataFromAPI', dataFromAPI);
+      localStorage.setItem("user_id", user_id);
       
       dispatch(addUser({email: dataFromAPI.email, token: dataFromAPI.token}));// no need to store the token in redux
       setEmail('');

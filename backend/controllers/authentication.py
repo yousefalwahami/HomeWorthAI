@@ -36,6 +36,7 @@ class LoginInput(BaseModel):
   password: str
 
 class Token(BaseModel):
+  user_id: int
   email: str
   token: str
   expires_at: str
@@ -65,14 +66,17 @@ async def login(login_input: LoginInput):
     # Query the database for the user
     cursor.execute("SELECT password_hash FROM users WHERE email = %s;", (login_input.email,))
     user = cursor.fetchone()
+    
+    cursor.execute("SELECT user_id FROM users WHERE email = %s;", (login_input.email,))
+    user_id_result = cursor.fetchone()
 
   if not user or not verify_password(login_input.password, user["password_hash"]):
     raise HTTPException(status_code=401, detail="Invalid email or password")
 
-
   token = create_access_token(email=login_input.email)
   expires_at = (datetime.now(timezone.utc) + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)).isoformat()
-  return {"email": login_input.email, "token": token, "expires_at": expires_at}
+
+  return {"user_id": user_id_result['user_id'], "email": login_input.email, "token": token, "expires_at": expires_at}
 
 
 
@@ -127,6 +131,9 @@ async def signup(login_input: LoginInput):
       """, (login_input.email.split('@')[0], login_input.email, password_hash))
       conn.commit()
 
+      cursor.execute("SELECT user_id FROM users WHERE email = %s;", (login_input.email,))
+      user_id = cursor.fetchone()
+
     except Exception as e:
       # Check for duplicate email or username
       if "unique constraint" in str(e).lower():
@@ -136,7 +143,7 @@ async def signup(login_input: LoginInput):
   # Create a token for the new user
   token = create_access_token(email=login_input.email)
   expires_at = (datetime.now(timezone.utc) + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)).isoformat()
-  return {"email": login_input.email, "token": token, "expires_at": expires_at}
+  return {"user_id": user_id, "email": login_input.email, "token": token, "expires_at": expires_at}
 
 
 @router.get("/user/session")
@@ -170,11 +177,11 @@ async def check_session(request: Request):
     if not user:
       raise HTTPException(status_code=401, detail="User does not exist")
 
-    # Return user details
-    return {"email": user["email"]}
-
-  except JWTError:
-    raise HTTPException(status_code=401, detail="Invalid or expired token")
-  finally:
     cursor.close()
     conn.close()
+    # Return user details
+    return {"email": user["email"]}
+    
+  except JWTError:
+    raise HTTPException(status_code=401, detail="Invalid or expired token")
+    
