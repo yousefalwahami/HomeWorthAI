@@ -11,7 +11,7 @@ import {
     navigationMenuTriggerStyle
   } from "./ui/navigation-menu";
 
-import { Link, NavigateFunction } from "react-router-dom";
+import { Link, NavigateFunction, useLocation } from "react-router-dom";
 import { useAppSelector } from "@/redux/store";
 import { User } from "@/redux/features/userSlice";
 import { useLogout, LogoutHook } from "@/hooks/useLogout";
@@ -21,12 +21,17 @@ export default function Navbar(): JSX.Element{
     const user: User | null = useAppSelector<User | null>(state=>state.user.user);
     const {logout}: LogoutHook = useLogout();
     const navigate: NavigateFunction = useNavigate();
+    const location = useLocation();
 
     function handleClick(e: React.SyntheticEvent<HTMLButtonElement>): void {
         e.preventDefault();
         logout();
         navigate('/');
     }
+
+    const hideNavbarRoutes = ['/chat', '/upload-chat', '/home'];
+    console.log(location.pathname)
+    const shouldShowNavbar = hideNavbarRoutes.includes(location.pathname);
 
     return(
         <div>
@@ -38,11 +43,11 @@ export default function Navbar(): JSX.Element{
                 </Link>
                 
                 <div className="flex flex-row items-center">
-                    <NavigationMenu className="lg:hidden flex">
-                        <NavigationMenuList>
-                            <NavigationMenuItem>
-                            <NavigationMenuTrigger>Options</NavigationMenuTrigger>
-                            <NavigationMenuContent className="">
+                    <NavigationMenu className="flex">
+                        {shouldShowNavbar && <NavigationMenuList>
+                            <NavigationMenuItem >
+                            <NavigationMenuTrigger className="bg-gray-100">Options</NavigationMenuTrigger>
+                            <NavigationMenuContent>
                                 <Link to="/home" >
                                     <NavigationMenuLink className={navigationMenuTriggerStyle()}>Home</NavigationMenuLink>
                                 </Link>
@@ -54,7 +59,7 @@ export default function Navbar(): JSX.Element{
                                 </Link>
                             </NavigationMenuContent>
                             </NavigationMenuItem>
-                        </NavigationMenuList>
+                        </NavigationMenuList>}
                     </NavigationMenu>
                     { user ? (<Button onClick={handleClick} variant = "ghost" className="text-lg h-[40px] hidden md:flex ">Log Out</Button>) : (<><Link to='/login'><Button variant = "ghost" className="text-lg h-[40px] hidden md:flex ">Log In</Button></Link><Link to="/signup"><Button variant = "outline" className="dark:text-white text-md mx-5 rounded-md h-[40px] hover:opacity-90 md:w-[84px] hidden md:flex">Sign up</Button></Link></>)}
                 </div>

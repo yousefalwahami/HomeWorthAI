@@ -146,6 +146,9 @@ async def check_session(request: Request):
   Returns user details if the session is valid.
   """
   # Extract the token from the Authorization header
+  
+  conn = get_connection()
+  cursor = conn.cursor()
   auth_header = request.headers.get("Authorization")
   if not auth_header or not auth_header.startswith("Bearer "):
     raise HTTPException(status_code=401, detail="Token missing or invalid")
@@ -161,8 +164,6 @@ async def check_session(request: Request):
       raise HTTPException(status_code=401, detail="Invalid token")
 
     # Query the database to check if the user exists
-    conn = get_connection()
-    cursor = conn.cursor()
     cursor.execute("SELECT email FROM users WHERE email = %s", (email,))
     user = cursor.fetchone()
 

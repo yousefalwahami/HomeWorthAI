@@ -51,8 +51,7 @@ function App() {
 
   return (
     <Router>
-      <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
-        <div className="min-h-screen h-fit bg-white">
+        <div className="min-h-screen h-fit bg-gray-100">
           <Navbar />
           <Routes>
             <Route path='/login' element={!user ? <Login /> : <Navigate to='/home' />} />
@@ -63,7 +62,6 @@ function App() {
             <Route path='/upload-chat' element={user ? <UploadChat/> : <Navigate to='/login' />} />
           </Routes>
         </div>
-        </ThemeProvider>
     </Router>
   )
 }

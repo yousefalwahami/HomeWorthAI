@@ -69,6 +69,8 @@ def save_image_to_db(user_id, filename, items, image_data):
     if conn:
       conn.close()
 
+
+#AVNOOR WILL ADD TO THE DATABASE HERE
 @router.post("/detect_objects")
 async def detect_objects(file: UploadFile = File(...), user_id: int = None):
   # Read the image file
@@ -130,10 +132,10 @@ async def detect_objects(file: UploadFile = File(...), user_id: int = None):
   print("Unique Classes (Items):", items)
 
   save_image_to_db(
-    user_id=user_id,  # You should dynamically determine the user ID
+    user_id=user_id, 
     filename=file.filename,
     items=items,
-    image_data=image_bytes  # Directly use image bytes here
+    image_data=image_bytes  
   )
 
   return {"detections": results}

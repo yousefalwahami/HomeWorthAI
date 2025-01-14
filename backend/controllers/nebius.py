@@ -22,6 +22,9 @@ client = OpenAI(
 async def nebius_chat(data: dict):
   prompt = data.get('prompt')
   user_id = data.get('user_id')
+  message_from_frontend = data.get('messages')
+  print(*message_from_frontend[-3:])
+
   if not prompt:
     raise HTTPException(status_code=400, detail="Prompt cannot be empty.")
   try:
@@ -30,21 +33,24 @@ async def nebius_chat(data: dict):
 
     # Using key item, get info from vector db
     key_item_embedding = generate_query_embedding(key_item)
-    pc_response = search_in_pinecone(key_item_embedding, user_id)
+
+    pc_response = search_in_pinecone(key_item_embedding, user_id, "message")
+
+    print(pc_response)
 
     # Call the Nebius API with the model and prompt
     completion = client.chat.completions.create(
-      model="meta-llama/Meta-Llama-3.1-70B-Instruct-fast",
+      model="meta-llama/Llama-3.3-70B-Instruct",
       # messages=[{"role": "user", "content": prompt}],
       messages = [{
           "role": "system",
-          "content": "You are to recieve metadata about something that the user is looking for."
+          "content": '''Your goal is to act as an AI chat bot to help people who have lost there home file insurance claims. 
+          We may or may not provide you with information. If the user is vague try to help them jog there memory. 
+          If you receive items such as chat logs or images let the user know. ENSURE TO ACT AS IF YOU ARE TALKING TO SOMEONE SO HAVE SOME BREVITY AT TIMES.'''
+
           # make sure to make it talk like an ai aswell -> if i say hello it should talk to me normally like an assistant
         },
-        {
-          "role": "user",
-          "content": f"Using this metadata, give me a proper response explaining where I can find {key_item} using this:\n{pc_response}"
-        }
+        *message_from_frontend[-3:]
       ],
       temperature=0.6,
       max_tokens=512,
@@ -53,20 +59,15 @@ async def nebius_chat(data: dict):
 
     # Return the completion response
     response = json.loads(completion.to_json())
-    message_content = response['choices'][0]['message']['content']
-    '''
-    try:
-      print(message_content)
-    except Exception as e:
-      print(e)
-    '''
 
     return {"response": response}
 
   except Exception as e:
+    print(e)
     raise HTTPException(status_code=500, detail=f"Error calling Nebius API: {str(e)}")
 
-@router.post("/prompt-chat")
+
+# @router.post("/prompt-chat")
 def extract_key_item_from_prompt(prompt: str):
   completion = client.chat.completions.create(
     model="meta-llama/Meta-Llama-3.1-8B-Instruct-fast",
@@ -88,7 +89,5 @@ def extract_key_item_from_prompt(prompt: str):
   # Parse the response
   response = json.loads(completion.to_json())
   key_item = response['choices'][0]['message']['content'].split('*')
-  print(response)
-  print('Key Item Found: ', key_item)
 
-  return key_item
+  return key_item[1]

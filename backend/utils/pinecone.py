@@ -50,8 +50,12 @@ def clear_index():
     Clears all vectors from the Pinecone index without deleting the index.
     """
     try:
+        index_stats = Pinecone.describe_index(name=index_name)
+        print(index_stats['total_vector_count'])
+
         index.delete(delete_all=True)
-        print(f"All vectors in the index '{index_name}' have been cleared.")
+        index_stats = Pinecone.describe_index(name=index_name)
+        print(index_stats['total_vector_count'])
     except Exception as e:
         print(f"Error clearing the index '{index_name}': {e}")
 
@@ -125,12 +129,9 @@ def generate_embeddings(dict_item_context):
 def generate_query_embedding(key_item):
     if not key_item:
         raise HTTPException(status_code=400, detail="Key item is empty.")
-    if key_item:
-        # Use the same format as stored in Pinecone
-        search_text = f"Item: {key_item} Context: "
     
-    inputs = clip_processor(text=[search_text], return_tensors="pt", padding=True, truncation=True)
-    
+    inputs = clip_processor(text=[key_item], return_tensors="pt", padding=True, truncation=True)
+
     with torch.no_grad():
         query_embedding = clip_model.get_text_features(**inputs)
 
@@ -153,6 +154,7 @@ def store_embeddings_in_pinecone(dict_item_context, embeddings, chat_id, file, u
             "metadata": {
                 "chat_id": chat_id,
                 "message_id": dict_item_context["ids"][i],
+                "type": "message",
                 "item": dict_item_context["items"][i],
                 "context": dict_item_context["context"][i],
                 "message": dict_item_context["messages"][i],
@@ -169,7 +171,7 @@ def store_embeddings_in_pinecone(dict_item_context, embeddings, chat_id, file, u
         print(f"Error upserting data to Pinecone: {e}")
         raise
 
-def search_in_pinecone(query_embedding, user_id):
+def search_in_pinecone(query_embedding, user_id, type):
     # for results: filter by dist, top 2 dist from pinecone
     
     # Step 1: Query Pinecone to get the top 5 closest results
@@ -179,7 +181,7 @@ def search_in_pinecone(query_embedding, user_id):
         top_k=5, 
         include_metadata=True,  # You can retrieve metadata too
         metric="cosine",
-        filter={"user_id": user_id}
+        filter={"user_id": user_id, "type": type}
     )
     
     # Step 2: Parse and return results
@@ -190,5 +192,4 @@ def search_in_pinecone(query_embedding, user_id):
         item_metadata = match['metadata']
         results.append(item_metadata)
 
-    print(results)
     return results

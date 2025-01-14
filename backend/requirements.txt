@@ -11,13 +11,14 @@ python-multipart
 python-dotenv
 requests
 openai
-sqlite3
 re
 bcrypt
 jwt
+# sqlite3
 
 # installation for embeddings
 transformers
 sentence-transformers
 pinecone
 psycopg2
+passlib

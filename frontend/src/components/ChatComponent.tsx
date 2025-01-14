@@ -58,8 +58,10 @@ const ChatComponent: React.FC<ChatComponentProps> = ({ user_id }) => {
     const payload = {
       prompt: inputText,
       user_id: user_id,
+      messages: messages,
     };
     console.log('User Id: ', payload.user_id);
+    setInputText('');
 
     try {
       // Send the request to the backend API
@@ -90,11 +92,11 @@ const ChatComponent: React.FC<ChatComponentProps> = ({ user_id }) => {
   return (
     <div className="max-w-xl mx-auto p-6 bg-white shadow-lg rounded-lg">
       {/* Display chat messages */}
-      <div className="space-y-4 mb-6">
+      <div className="space-y-4 mb-6 max-h-[500px] overflow-y-scroll hide-scrollbar">
         {messages.map((message, index) => (
           <div
             key={index}
-            className={`p-4 rounded-lg text-white flex items-center ${
+            className={`p-4 rounded-lg text-black flex items-center ${
               message.sender === 'user' ? 'bg-teal-500 text-right flex-row-reverse' : 'bg-gray-300 text-left flex-row'
             }`}
           >
