@@ -45,7 +45,6 @@ const ChatComponent: React.FC<ChatComponentProps> = ({ userId }) => {
       { sender: 'user', text: inputText || `File: ${file?.name}` },
     ]);
 
-    /*
     // Prepare form data for sending
     const formData = new FormData();
     if (file) {
@@ -55,32 +54,22 @@ const ChatComponent: React.FC<ChatComponentProps> = ({ userId }) => {
       formData.append('text', inputText);
     }
     formData.append('user_id', String(userId));
-    */
 
-    // Prepare the data for sending as JSON
     const payload = {
+      prompt: inputText,
       user_id: userId,
-      text: inputText || null,
-      // Handle file sending if needed (for example, you can send a file URL or base64)
-      file: file ? file.name : null,
     };
 
-    // TODO: its not working fam .. im tried its 2am
     try {
       // Send the request to the backend API
-      const response = await axios.post(
-        'http://localhost:8000/api/nebius-chat',
-        // formData,
-        payload,
-        {
-          headers: { 'Content-Type': 'application/json' },
-        }
-      );
+      const response = await axios.post('http://localhost:8000/api/nebius-chat', payload, {
+        headers: { 'Content-Type': 'application/json' },
+      });
 
       // Add bot's response to the chat
       const botMessage: Message = {
         sender: 'bot',
-        text: response.data.message || 'No response from bot.',
+        text: response.data.response.choices[0].message.content || 'No response from bot.',
       };
 
       setMessages((prevMessages) => [...prevMessages, botMessage]);

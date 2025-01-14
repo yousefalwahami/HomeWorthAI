@@ -42,18 +42,18 @@ function App() {
     return <div className="flex justify-center items-center h-screen">Loading...</div>;
   }
 
-  // const hideNavbarRoutes = ['/home', '/meeting', '/intake', '/results'];
-  // const shouldShowNavbar = !hideNavbarRoutes.includes(location.pathname);
+  const hideNavbarRoutes = ['/chat', '/upload-chat'];
+  const shouldShowNavbar = !hideNavbarRoutes.includes(location.pathname);
 
   return (
     <Router>
       <div className="min-h-screen h-fit bg-white">
-        <Navbar />
-        {/* shouldShowNavbar && <Navbar /> */}
+        {/*<Navbar /> */}
+        { shouldShowNavbar && <Navbar /> }
         <Routes>
           <Route path='/login' element={!user ? <Login /> : <Navigate to='/' />} />
-          <Route path='/' element={!user ? <Login /> : <Navigate to='/' />} />
-          <Route path='/signup' element={!user ? <SignUp /> : <Navigate to='/' />} />
+          <Route path='/' element={!user ? <Login /> : <Navigate to='/home' />} />
+          <Route path='/signup' element={!user ? <SignUp /> : <Navigate to='/home' />} />
           <Route path='/home' element={user ? <HomePage /> : <Navigate to='/login' />} />
           <Route path='/chat' element={user ? <ChatPage/> : <Navigate to='/login' />} />
         </Routes>

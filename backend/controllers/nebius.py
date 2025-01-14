@@ -1,6 +1,6 @@
 import os
 from openai import OpenAI
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, File, Form, HTTPException, UploadFile
 from dotenv import load_dotenv
 import json
 from utils.pinecone import generate_query_embedding, search_in_pinecone
@@ -18,7 +18,9 @@ client = OpenAI(
 
 # Route for sending a prompt to the model
 @router.post("/nebius-chat")
-async def nebius_chat(prompt: str):
+#async def nebius_chat(prompt: str = Form(...), file: UploadFile = File(None), user_id: str = Form(...)):
+async def nebius_chat(data: dict):
+  prompt = data.get('prompt')
   if not prompt:
     raise HTTPException(status_code=400, detail="Prompt cannot be empty.")
   try:
