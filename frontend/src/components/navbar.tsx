@@ -33,7 +33,7 @@ export default function Navbar(): JSX.Element{
             <nav className='w-full flex flex-row justify-between items-center px-10 py-6 font-Montserrat'>
                 <Link to="/" className="flex flex-row items-center">
                     <p className="text-2xl font-bold leading-10">
-                        InterviewME
+                        HomeWorthAI
                     </p>
                 </Link>
                 

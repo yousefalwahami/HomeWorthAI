@@ -13,6 +13,8 @@ requests
 openai
 sqlite3
 re
+bcrypt
+jwt
 
 # installation for embeddings
 transformers

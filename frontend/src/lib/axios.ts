@@ -6,4 +6,13 @@ const api = axios.create({
     withCredentials: true, // Important for sending cookies with requests
 });
 
+// Add an interceptor to include the token in every request
+api.interceptors.request.use((config) => {
+    const token = localStorage.getItem("token"); // Replace with your token storage mechanism
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+});
+  
 export default api;

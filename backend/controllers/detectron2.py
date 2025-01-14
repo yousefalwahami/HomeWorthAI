@@ -90,7 +90,6 @@ async def detect_objects(file: UploadFile = File(...)):
 
   # Extract object labels
   detected_labels = [COCO_CLASSES[cls] for cls in classes if cls < len(COCO_CLASSES)]
-  print('abc', detected_labels)
 
   # Generate embeddings using CLIP for detected object labels
   inputs = clip_processor(text=detected_labels, return_tensors="pt", padding=True)
@@ -138,37 +137,3 @@ async def detect_objects(file: UploadFile = File(...)):
   )
 
   return {"detections": results}
-
-
-  '''  results = [
-    {"bbox": box.tolist(), "score": float(score), "class": int(cls)}
-    for box, score, cls in zip(boxes, scores, classes)
-  ]
-  print(results)
-  image = StreamingResponse(img_byte_arr, media_type="image/png")
-  generate_image_embedding(image)
-  
-  return StreamingResponse(img_byte_arr, media_type="image/png")
-  '''
-
-
-  
-'''
-# RAG query
-def generate_text_embedding(text):
-  text_embeddings = embedding_model.encode([text])  # Sentence transformer model
-  return text_embeddings[0]
-
-# Example text query
-query_text = "looking for my phone in the kitchen"
-
-# Generate the query embedding
-query_embedding = generate_text_embedding(query_text)
-
-# Query Pinecone to find the most relevant image(s)
-results = index.query(query_embedding, top_k=5, include_metadata=True)
-
-# Display the results
-for result in results["matches"]:
-  print(f"Image ID: {result['id']}, Metadata: {result['metadata']}")
-'''

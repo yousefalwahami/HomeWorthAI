@@ -11,7 +11,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@radix-ui/react-label";
 //import { Label } from "@/components/ui/label";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import axios, {AxiosError, AxiosResponse} from "axios";
 import { NavigateFunction, useNavigate } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "@/redux/store";
@@ -40,6 +40,13 @@ function Login(): JSX.Element {
   const dispatch = useAppDispatch();
   const user = useAppSelector(state => state.user.user);
 
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (token && user) {
+      navigate("/home");
+    }
+  }, [user, navigate]);
+
   if(user){
     navigate('/home');
   }
@@ -49,6 +56,9 @@ function Login(): JSX.Element {
       const formInput:formData = {email: email, password: password};
       const response: AxiosResponse = await api.post('/api/user/login', formInput);
       const dataFromAPI: responseData = response.data;
+      const { token } = response.data;
+      localStorage.setItem("token", token);
+      console.log('dataFromAPI', dataFromAPI);
       
       dispatch(addUser({email: dataFromAPI.email, token: dataFromAPI.token}));// no need to store the token in redux
       setEmail('');
