@@ -171,14 +171,15 @@ def store_embeddings_in_pinecone(dict_item_context, embeddings, chat_id, file, u
         print(f"Error upserting data to Pinecone: {e}")
         raise
 
-def search_in_pinecone(query_embedding):
+def search_in_pinecone(query_embedding, user_id):
     # Step 1: Query Pinecone to get the top 5 closest results
     query_vector = query_embedding.cpu().numpy().tolist()
     result = index.query(
         vector=query_vector, 
         top_k=5, 
         include_metadata=True,  # You can retrieve metadata too
-        metric="cosine"
+        metric="cosine",
+        filter={"user_id": user_id}
     )
     
     # Step 2: Parse and return results

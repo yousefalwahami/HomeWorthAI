@@ -21,6 +21,7 @@ client = OpenAI(
 #async def nebius_chat(prompt: str = Form(...), file: UploadFile = File(None), user_id: str = Form(...)):
 async def nebius_chat(data: dict):
   prompt = data.get('prompt')
+  userId = data.get('user_id')
   if not prompt:
     raise HTTPException(status_code=400, detail="Prompt cannot be empty.")
   try:
@@ -29,7 +30,7 @@ async def nebius_chat(data: dict):
 
     # Using key item, get info from vector db
     key_item_embedding = generate_query_embedding(key_item)
-    pc_response = search_in_pinecone(key_item_embedding)
+    pc_response = search_in_pinecone(key_item_embedding, userId)
 
     # Call the Nebius API with the model and prompt
     completion = client.chat.completions.create(
@@ -86,11 +87,5 @@ def extract_key_item_from_prompt(prompt: str):
   key_item = response['choices'][0]['message']['content'].split('*')
   print(response)
   print('Key Item Found: ', key_item)
-
-  '''
-  key_item_embedding = generate_query_embedding(key_item)
-  pc_response = search_in_pinecone(key_item_embedding)
-  print('pinecone response: ', pc_response)
-  '''
 
   return key_item
