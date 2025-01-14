@@ -1,4 +1,5 @@
 import json
+from fastapi import HTTPException
 from openai import OpenAI
 from sentence_transformers import SentenceTransformer
 import torch
@@ -15,8 +16,6 @@ client = OpenAI(
     api_key=os.environ.get("NEBIUS_API_KEY")
 )
 
-# model = SentenceTransformer('all-MiniLM-L6-v2')  # You can replace this with another model if needed
-
 # Initialize CLIP for text embeddings
 clip_model = CLIPModel.from_pretrained("openai/clip-vit-base-patch32")
 clip_processor = CLIPProcessor.from_pretrained("openai/clip-vit-base-patch32")
@@ -32,8 +31,7 @@ index_name = "item-context-embeddings-512"
 if index_name not in pc.list_indexes().names():
     pc.create_index(
         name=index_name,
-        # dimension=384,  # Embedding dimension for 'all-MiniLM-L6-v2'
-        dimension=512,  # Embedding dimension for 'CLIP ViT b3'
+        dimension=512,
         spec=ServerlessSpec(
             cloud="aws",  # Specify your cloud provider
             region="us-east-1"  # Specify your region
@@ -127,11 +125,11 @@ def generate_embeddings(dict_item_context):
 
 # With the extracted key item from the user prompt, we pass it here to make it a query embedding
 def generate_query_embedding(key_item):
+    if not key_item:
+        raise HTTPException(status_code=400, detail="Key item is empty.")
     if key_item:
         # Use the same format as stored in Pinecone
         search_text = f"Item: {key_item} Context: "
-    else:
-        search_text = "Item: Phone Context: "
     
     inputs = clip_processor(text=[search_text], return_tensors="pt", padding=True, truncation=True)
     

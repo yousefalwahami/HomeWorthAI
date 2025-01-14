@@ -1,4 +1,3 @@
-# controllers/nebius.py
 import os
 from openai import OpenAI
 from fastapi import APIRouter, HTTPException
@@ -82,24 +81,5 @@ def extract_key_item_from_prompt(prompt: str):
   key_item_embedding = generate_query_embedding(key_item)
   pc_response = search_in_pinecone(key_item_embedding)
   print('pinecone response: ', pc_response)
-  # content = response['choices'][0]['message']['content'].split('*')
 
   return pc_response
-
-
-def handle_user_query(query):
-  # Step 1: Generate query embedding
-  query_embedding = generate_query_embedding(query)
-  
-  # Step 2: Search for matching items in Pinecone
-  results = search_in_pinecone(query_embedding)
-  
-  # Step 3: Format results and return to the user
-  if results:
-    response = "I found the following items related to your query:"
-    for result in results:
-      response += f"\n- {result['item']} located at {result['context']}"
-  else:
-    response = "Sorry, I couldn't find any matching items."
-  
-  return response

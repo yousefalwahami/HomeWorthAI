@@ -130,9 +130,6 @@ async def detect_objects(file: UploadFile = File(...)):
   print(results)
   print("Unique Classes (Items):", items)
 
-  # TODO: Store results in a vector database (e.g., Pinecone) here
-  # You can use the 'results' dictionary to upload both embeddings and metadata
-
   save_image_to_db(
     user_id=1,  # You should dynamically determine the user ID
     filename=file.filename,
