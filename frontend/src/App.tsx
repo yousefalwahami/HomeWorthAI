@@ -9,6 +9,7 @@ import HomePage from './pages/HomePage';
 import Login from './pages/Login';
 import ChatPage from './pages/Chat';
 import SignUp from './pages/SignUp';
+import UploadChat from './pages/UploadChat'
 import Navbar from './components/navbar';
 
 type userType = {
@@ -43,21 +44,23 @@ function App() {
     return <div className="flex justify-center items-center h-screen">Loading...</div>;
   }
 
+  /*
   const hideNavbarRoutes = ['/chat', '/upload-chat'];
   const shouldShowNavbar = !hideNavbarRoutes.includes(location.pathname);
+  */
 
   return (
     <Router>
       <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
         <div className="min-h-screen h-fit bg-white">
-          {/*<Navbar /> */}
-          { shouldShowNavbar && <Navbar /> }
+          <Navbar />
           <Routes>
-            <Route path='/login' element={!user ? <Login /> : <Navigate to='/' />} />
+            <Route path='/login' element={!user ? <Login /> : <Navigate to='/home' />} />
             <Route path='/' element={!user ? <Login /> : <Navigate to='/home' />} />
             <Route path='/signup' element={!user ? <SignUp /> : <Navigate to='/home' />} />
             <Route path='/home' element={user ? <HomePage /> : <Navigate to='/login' />} />
             <Route path='/chat' element={user ? <ChatPage/> : <Navigate to='/login' />} />
+            <Route path='/upload-chat' element={user ? <UploadChat/> : <Navigate to='/login' />} />
           </Routes>
         </div>
         </ThemeProvider>

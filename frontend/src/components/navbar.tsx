@@ -41,13 +41,16 @@ export default function Navbar(): JSX.Element{
                     <NavigationMenu className="lg:hidden flex">
                         <NavigationMenuList>
                             <NavigationMenuItem>
-                            <NavigationMenuTrigger>Details</NavigationMenuTrigger>
+                            <NavigationMenuTrigger>Options</NavigationMenuTrigger>
                             <NavigationMenuContent className="">
-                                <Link to="/login" >
-                                    <NavigationMenuLink className={navigationMenuTriggerStyle()}>Deets</NavigationMenuLink>
+                                <Link to="/home" >
+                                    <NavigationMenuLink className={navigationMenuTriggerStyle()}>Home</NavigationMenuLink>
                                 </Link>
-                                <Link to="/login" >
-                                    <NavigationMenuLink className={navigationMenuTriggerStyle()}>something else</NavigationMenuLink>
+                                <Link to="/upload-chat" >
+                                    <NavigationMenuLink className={navigationMenuTriggerStyle()}>Upload chats</NavigationMenuLink>
+                                </Link>
+                                <Link to="/chat" >
+                                    <NavigationMenuLink className={navigationMenuTriggerStyle()}>Chat with bot</NavigationMenuLink>
                                 </Link>
                             </NavigationMenuContent>
                             </NavigationMenuItem>

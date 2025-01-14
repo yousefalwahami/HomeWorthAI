@@ -9,7 +9,7 @@ function HomePage() {
     navigate('/chat');
   }
   const handleChatlogNav = async () =>{
-    navigate('/');
+    navigate('/upload-chat');
   }
 
   return (

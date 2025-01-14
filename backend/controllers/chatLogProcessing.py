@@ -1,4 +1,5 @@
-from fastapi import APIRouter, File, HTTPException, UploadFile
+from typing import Dict
+from fastapi import APIRouter, Body, File, HTTPException, UploadFile
 import os
 from utils.pinecone import extract_insights_from_chatlog, generate_embeddings, store_embeddings_in_pinecone
 from database.database import get_connection
@@ -11,7 +12,8 @@ router = APIRouter()
 #file: UploadFile means that the file type will be of type upload file
 #File(...) lets Fast API know it will be coming from the requests multipart/form-data body.
 @router.post("/process_chatlog")
-async def process_chatlog(file: UploadFile = File(...), user_id: int = None):
+#async def process_chatlog(file: UploadFile = File(...), user_id: int = None):4
+async def process_chatlog(file: UploadFile = File(...), user_id: int = Body(...)):
     if not user_id:
         raise HTTPException(status_code=400, detail="User ID is required") 
     
@@ -29,7 +31,7 @@ async def process_chatlog(file: UploadFile = File(...), user_id: int = None):
 
     chatlog_content = await file.read()
     chatlog_content = chatlog_content.decode('utf-8')
-    
+
     # Step 3: Extract insights using Llama
     dict_item_context = extract_insights_from_chatlog(chatlog_content)
 

@@ -151,7 +151,6 @@ async def check_session(request: Request):
     raise HTTPException(status_code=401, detail="Token missing or invalid")
 
   token = auth_header.split(" ")[1]  # Get the token part
-  print('tokie:', token)
 
   try:
     # Decode the token

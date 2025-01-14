@@ -79,8 +79,6 @@ def extract_insights_from_chatlog(chatlog_content):
     # Parse the response
     response = json.loads(completion.to_json())
     content = response['choices'][0]['message']['content'].split('*')
-    print('ABC:: ', response)
-    print('END')
 
     items = []
     context = []
@@ -172,6 +170,8 @@ def store_embeddings_in_pinecone(dict_item_context, embeddings, chat_id, file, u
         raise
 
 def search_in_pinecone(query_embedding, user_id):
+    # for results: filter by dist, top 2 dist from pinecone
+    
     # Step 1: Query Pinecone to get the top 5 closest results
     query_vector = query_embedding.cpu().numpy().tolist()
     result = index.query(

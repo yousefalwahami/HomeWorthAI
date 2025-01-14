@@ -21,7 +21,7 @@ client = OpenAI(
 #async def nebius_chat(prompt: str = Form(...), file: UploadFile = File(None), user_id: str = Form(...)):
 async def nebius_chat(data: dict):
   prompt = data.get('prompt')
-  userId = data.get('user_id')
+  user_id = data.get('user_id')
   if not prompt:
     raise HTTPException(status_code=400, detail="Prompt cannot be empty.")
   try:
@@ -30,7 +30,7 @@ async def nebius_chat(data: dict):
 
     # Using key item, get info from vector db
     key_item_embedding = generate_query_embedding(key_item)
-    pc_response = search_in_pinecone(key_item_embedding, userId)
+    pc_response = search_in_pinecone(key_item_embedding, user_id)
 
     # Call the Nebius API with the model and prompt
     completion = client.chat.completions.create(
@@ -39,6 +39,7 @@ async def nebius_chat(data: dict):
       messages = [{
           "role": "system",
           "content": "You are to recieve metadata about something that the user is looking for."
+          # make sure to make it talk like an ai aswell -> if i say hello it should talk to me normally like an assistant
         },
         {
           "role": "user",
@@ -72,11 +73,13 @@ def extract_key_item_from_prompt(prompt: str):
     messages=[
       {
         "role": "system",
-        "content": "You are an assistant that extracts a specific key item of what the user is looking for."
+        "content": "You are an assistant that extracts a specific key item and context of what the user is looking for filling insurance claims."
       },
       {
         "role": "user",
-        "content": f"Extract a key item of what I'm looking for from my prompt :\n{prompt}\n\nFormat as:\n* Item: [item]"
+        "content": f"Extract a key item of what I'm looking for from my prompt :\n{prompt}\n\nFormat as:\n* Item: [item] Context: [context]."
+        # if you believe there is no query, return no query
+        # if its a generic query, make up query "like I need to find some items"
       }
     ],
     temperature=0

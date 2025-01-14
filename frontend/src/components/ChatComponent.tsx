@@ -11,10 +11,10 @@ interface Message {
 }
 
 interface ChatComponentProps {
-  userId: number;
+  user_id: number;
 }
 
-const ChatComponent: React.FC<ChatComponentProps> = ({ userId }) => {
+const ChatComponent: React.FC<ChatComponentProps> = ({ user_id }) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputText, setInputText] = useState<string>('');
   const [file, setFile] = useState<File | null>(null);
@@ -53,12 +53,13 @@ const ChatComponent: React.FC<ChatComponentProps> = ({ userId }) => {
     if (inputText) {
       formData.append('text', inputText);
     }
-    formData.append('user_id', String(userId));
+    formData.append('user_id', String(user_id));
 
     const payload = {
       prompt: inputText,
-      user_id: userId,
+      user_id: user_id,
     };
+    console.log('User Id: ', payload.user_id);
 
     try {
       // Send the request to the backend API

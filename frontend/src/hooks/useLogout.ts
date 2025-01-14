@@ -11,7 +11,8 @@ export const useLogout = (): LogoutHook =>{
 
     const logout = async () =>{
         try{
-            await api.post('/api/user/logout');
+            // await api.post('/api/user/logout');
+            localStorage.removeItem("token");
             dispatch(removeUser());
         } catch(error){
             console.error('Logout failed', error);

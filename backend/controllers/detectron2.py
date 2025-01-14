@@ -63,11 +63,11 @@ def save_image_to_db(user_id, filename, items, image_data):
     print("Error saving image to DB:", e)
   
   finally:
-        # Ensure the cursor and connection are closed properly
-        if cursor:
-            cursor.close()
-        if conn:
-            conn.close()
+    # Ensure the cursor and connection are closed properly
+    if cursor:
+      cursor.close()
+    if conn:
+      conn.close()
 
 @router.post("/detect_objects")
 async def detect_objects(file: UploadFile = File(...), user_id: int = None):

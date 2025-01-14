@@ -42,7 +42,7 @@ function Login(): JSX.Element {
 
   useEffect(() => {
     const token = localStorage.getItem("token");
-    if (token && user) {
+    if (token || user) {
       navigate("/home");
     }
   }, [user, navigate]);
