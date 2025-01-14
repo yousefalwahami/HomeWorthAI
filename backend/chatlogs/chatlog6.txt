@@ -1,0 +1,11 @@
+[2025-01-13 09:05:12] Alex: Have you seen my phone? I can’t find it anywhere.
+[2025-01-13 09:05:46] Sam: I haven’t, but did you check the kitchen counter? It might be there.
+
+[2025-01-13 09:08:29] Alex: I looked, it’s not there. Maybe I left it in the car.
+[2025-01-13 09:09:02] Sam: I’ll check the car in a bit, but last time I saw it, it was on the coffee table.
+
+[2025-01-13 09:12:17] Alex: Hmm, I don’t remember leaving it there. Did I take it to your office?
+[2025-01-13 09:12:49] Sam: I don’t think so. I haven’t seen it in here, but I’ll double-check.
+
+[2025-01-13 09:15:04] Alex: Thanks, I’ll keep looking around the house. Maybe it fell under the couch.
+[2025-01-13 09:15:32] Sam: Good idea! Let me know if you find it.

@@ -6,6 +6,7 @@ from controllers.bert import router as bert_router
 from controllers.nebius import router as nebius_router
 from controllers.upload_backup import router as upload_backup_router
 from database.database import get_connection
+from utils.pinecone import clear_index
 
 app = FastAPI()
 '''
@@ -43,3 +44,5 @@ cursor = conn.cursor()
 @app.get("/")
 def read_root():
   return {"message": "Hello, World!"}
+
+# clear_index()

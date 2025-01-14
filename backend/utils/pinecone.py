@@ -47,15 +47,28 @@ index = pc.Index(index_name)
 # Query the index to check the inserted vectors
 result = index.describe_index_stats()
 
+def clear_index():
+    """
+    Clears all vectors from the Pinecone index without deleting the index.
+    """
+    try:
+        index.delete(delete_all=True)
+        print(f"All vectors in the index '{index_name}' have been cleared.")
+    except Exception as e:
+        print(f"Error clearing the index '{index_name}': {e}")
+
+def query_index(query_vector):
+    response = index.query(query_vector=query_vector, top_k=1)
+    return response
+
+
 def extract_insights_from_chatlog(chatlog_content):
-    # Use Llama-3.3-70B-Instruct to extract entities and context
     completion = client.chat.completions.create(
         model="meta-llama/Meta-Llama-3.1-8B-Instruct-fast",
-        # change model to CLIP
         messages=[
             {
                 "role": "system",
-                "content": "You are an assistant that extracts key items, their locations, and the message(including timestamp) they come from in chat logs."
+                "content": "You are an assistant that extracts key items, the location of the item, and the message (including timestamp) they come from in chat logs."
             },
             {
                 "role": "user",
@@ -68,6 +81,8 @@ def extract_insights_from_chatlog(chatlog_content):
     # Parse the response
     response = json.loads(completion.to_json())
     content = response['choices'][0]['message']['content'].split('*')
+    print('ABC:: ', response)
+    print('END')
 
     items = []
     context = []
@@ -89,7 +104,7 @@ def extract_insights_from_chatlog(chatlog_content):
 
 def generate_embeddings(dict_item_context):
     """
-    Generates embeddings for a list of insights using SentenceTransformer.
+    Generates embeddings for a list of insights using CLIP.
 
     Args:
         insights (list of str): The extracted insights or key phrases.
@@ -108,8 +123,23 @@ def generate_embeddings(dict_item_context):
         text_embeddings = clip_model.get_text_features(**inputs)
 
     return text_embeddings
-    # embeddings = model.encode([item + ' ' + context for (item, context) in zip(dict_item_context["items"], dict_item_context["context"])], convert_to_tensor=False)  # Set convert_to_tensor=False to return NumPy arrays
-    # return embeddings
+
+
+# With the extracted key item from the user prompt, we pass it here to make it a query embedding
+def generate_query_embedding(key_item):
+    if key_item:
+        # Use the same format as stored in Pinecone
+        search_text = f"Item: {key_item} Context: "
+    else:
+        search_text = "Item: Phone Context: "
+    
+    inputs = clip_processor(text=[search_text], return_tensors="pt", padding=True, truncation=True)
+    
+    with torch.no_grad():
+        query_embedding = clip_model.get_text_features(**inputs)
+
+    return query_embedding
+
 
 def store_embeddings_in_pinecone(dict_item_context, embeddings, chat_id, file):
     """
@@ -141,3 +171,24 @@ def store_embeddings_in_pinecone(dict_item_context, embeddings, chat_id, file):
     except Exception as e:
         print(f"Error upserting data to Pinecone: {e}")
         raise
+
+def search_in_pinecone(query_embedding):
+    # Step 1: Query Pinecone to get the top 5 closest results
+    query_vector = query_embedding.cpu().numpy().tolist()
+    result = index.query(
+        vector=query_vector, 
+        top_k=5, 
+        include_metadata=True,  # You can retrieve metadata too
+        metric="cosine"
+    )
+    
+    # Step 2: Parse and return results
+    results = []
+    
+    for match in result['matches']:
+        # Each match includes metadata (item, context, etc.)
+        item_metadata = match['metadata']
+        results.append(item_metadata)
+
+    print(results)
+    return results

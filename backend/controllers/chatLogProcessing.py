@@ -4,6 +4,7 @@ from utils.pinecone import extract_insights_from_chatlog, generate_embeddings, s
 from database.database import get_connection
 from datetime import datetime
 import re
+from utils.pinecone import generate_query_embedding, search_in_pinecone
 
 router = APIRouter()
 
@@ -19,7 +20,7 @@ async def process_chatlog(file: UploadFile = File(...)):
         f.write(await file.read())
     
     # Step 2: Read chat log content
-    with open(file_path, "r") as fi:
+    with open(file_path, "r", encoding='utf-8') as fi:
         chatlog_content = fi.read()
     
     # Step 3: Extract insights using Llama
@@ -110,7 +111,9 @@ def save_message_to_db(dict_item_context, chat_id):
                 ))
 
                 dict_item_context["ids"].append(cursor.fetchone()["message_id"])
-
+                #print len messages, len ids
+        print('mes len: ', len(messages))
+        print('ids len: ', len(dict_item_context["ids"]))
 
 
 
