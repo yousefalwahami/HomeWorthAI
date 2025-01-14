@@ -23,20 +23,31 @@ async def nebius_chat(data: dict):
   prompt = data.get('prompt')
   user_id = data.get('user_id')
   message_from_frontend = data.get('messages')
-  print(*message_from_frontend[-3:])
+  searchChat = data.get('searchChat')
+  searchImage = data.get('searchImage')
+
+  print(searchChat)
+  print(searchImage)
 
   if not prompt:
     raise HTTPException(status_code=400, detail="Prompt cannot be empty.")
   try:
     # Key item from user
     key_item = extract_key_item_from_prompt(prompt)
+    print(key_item)
 
     # Using key item, get info from vector db
     key_item_embedding = generate_query_embedding(key_item)
 
     pc_response = search_in_pinecone(key_item_embedding, user_id, "message")
-
-    print(pc_response)
+    
+    formatted_messages = [
+          {"role": "user" if msg["sender"] == "user" else "assistant", "content": msg["text"]}
+          for msg in message_from_frontend 
+      ]
+    
+    formatted_messages = formatted_messages[-4:] if len(formatted_messages) > 4 else formatted_messages
+    
 
     # Call the Nebius API with the model and prompt
     completion = client.chat.completions.create(
@@ -44,13 +55,17 @@ async def nebius_chat(data: dict):
       # messages=[{"role": "user", "content": prompt}],
       messages = [{
           "role": "system",
-          "content": '''Your goal is to act as an AI chat bot to help people who have lost there home file insurance claims. 
+          "content": '''Your goal is to act as an AI chat bot to help people who have lost there home remember items lost in there home. 
           We may or may not provide you with information. If the user is vague try to help them jog there memory. 
           If you receive items such as chat logs or images let the user know. ENSURE TO ACT AS IF YOU ARE TALKING TO SOMEONE SO HAVE SOME BREVITY AT TIMES.'''
 
           # make sure to make it talk like an ai aswell -> if i say hello it should talk to me normally like an assistant
         },
-        *message_from_frontend[-3:]
+        *formatted_messages,
+        {
+          "role": "user",
+          "content": f"METADATA: none, user message: {prompt}"
+        }
       ],
       temperature=0.6,
       max_tokens=512,
@@ -74,7 +89,9 @@ def extract_key_item_from_prompt(prompt: str):
     messages=[
       {
         "role": "system",
-        "content": "You are an assistant that extracts a specific key item and context of what the user is looking for filling insurance claims."
+        "content": '''You are an assistant that extracts a specific key item and context of what 
+        the user is looking for filling insurance claims.
+        '''
       },
       {
         "role": "user",
