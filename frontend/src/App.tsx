@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route, Link, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import './App.css'
 
 import HomePage from './pages/HomePage';
@@ -12,7 +12,7 @@ function App() {
 
   return (
     <Router>
-      <div className="min-h-screen bg-white">
+      <div className="min-h-screen h-fit bg-white">
         <Navbar />
         <Routes>
           <Route path='/login' element={!user ? <Login /> : <Navigate to='/' />} />

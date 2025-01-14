@@ -78,7 +78,7 @@ function SignUp(): JSX.Element {
     //basically shadcn will give us the base of the component
     //then we have to add all the stuff we want on top
     return (
-        <div className='flex flex-col items-center justify-center h-[calc(90vh-90px)] w-full'>
+        <div className='flex flex-col items-center justify-center h-[calc(120vh-90px)] w-full'>
             <Card className="w-[400px]">
             <CardHeader>
                 <CardTitle>Sign up</CardTitle>
