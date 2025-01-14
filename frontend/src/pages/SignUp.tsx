@@ -60,9 +60,9 @@ function SignUp(): JSX.Element {
 
             const response: AxiosResponse = await api.post('/api/user/register', formInput);
             const dataFromAPI: responseData = response.data;
-            const { token } = response.data;
+            const { token, user_id } = response.data;
             localStorage.setItem("token", token);
-            console.log('dataFromAPI', dataFromAPI);
+            localStorage.setItem("user_id", user_id);
             
             dispatch(addUser({email: dataFromAPI.email, token: dataFromAPI.token}));// no need to store the token in redux
             setEmail('');

@@ -3,7 +3,7 @@ import ChatComponent from '@/components/ChatComponent';
 
 // This is the page where the chat will be shown
 const ChatPage: React.FC = () => {
-  const user_id = 1; // You can pass the user_id dynamically, for now, it's a fixed value
+  const user_id = Number(localStorage.getItem("user_id"));
 
   return (
     <div className="min-h-screen bg-gray-100 flex items-center justify-center">

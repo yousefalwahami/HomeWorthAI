@@ -1,15 +1,41 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import api from '@/lib/axios'; // Import your Axios instance if you need to upload to the backend
+import { Button } from "@/components/ui/button"; // Replace with your actual button component
+import { Input } from "@/components/ui/input"; // Replace with your input component
 
-const ChatPage: React.FC = () => {
+
+const UploadChatPage: React.FC = () => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [uploadMessage, setUploadMessage] = useState<string | null>(null);
   const [serverResponse, setServerResponse] = useState<string | null>(null); // State for server response
-  const user_id = 1; // You can pass the user_id dynamically, for now, it's a fixed value
+  const user_id = Number(localStorage.getItem("user_id"));
+  const [isDragging, setIsDragging] = useState(false); // Track drag-and-drop state
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const triggerFileInput = () => {
+    fileInputRef.current?.click();
+  };
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files && event.target.files[0]) {
       setSelectedFile(event.target.files[0]);
+    }
+  };
+
+  const handleDragOver = (event: React.DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = () => {
+    setIsDragging(false);
+  };
+
+  const handleDrop = (event: React.DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    setIsDragging(false);
+    if (event.dataTransfer.files && event.dataTransfer.files[0]) {
+      setSelectedFile(event.dataTransfer.files[0]);
     }
   };
 
@@ -21,15 +47,9 @@ const ChatPage: React.FC = () => {
 
     const formData = new FormData();
     formData.append("file", selectedFile);
-    formData.append("user_id", user_id.toString());  // Assuming user_id is a number
+    formData.append("user_id", user_id.toString());
     console.log('help: ', formData);
 
-    /*
-    const payload = {
-      file: selectedFile,
-      user_id: user_id,
-    };
-    */
 
     try {
       const response = await api.post('/api/process_chatlog', formData, {
@@ -50,28 +70,60 @@ const ChatPage: React.FC = () => {
         <h1 className="text-3xl font-semibold text-center text-teal-600 mb-8">
           Upload chat fam
         </h1>
-        
-        <div className="flex flex-col items-center">
-          <input
+
+        <div
+          className={`flex flex-col items-center justify-center w-full h-40 border-2 ${
+            isDragging ? "border-teal-600 bg-teal-50" : "border-gray-300"
+          } border-dashed rounded-md p-4`}
+          onDragOver={handleDragOver}
+          onDragLeave={handleDragLeave}
+          onDrop={handleDrop}
+        >
+          <p className="text-gray-600 mb-2">
+            Drag & drop your file here or click to select.
+          </p>
+          <Input
             type="file"
             accept=".txt,.json" // Adjust accepted file types as needed
             onChange={handleFileChange}
-            className="mb-4"
+            className="hidden" // Hide the default input
           />
-          <button
-            onClick={handleUpload}
-            className="bg-teal-600 text-white px-4 py-2 rounded hover:bg-teal-700 transition"
+          <Button
+            variant="outline"
+            onClick={() => {
+              const fileInput = document.querySelector("input[type='file']") as HTMLInputElement;
+              fileInput?.click();
+            }}
           >
-            Upload File
-          </button>
-          {uploadMessage && (
-            <p className="mt-4 text-center text-sm text-gray-700">{uploadMessage}</p>
-          )}
+            Browse File
+          </Button>
         </div>
-        {serverResponse}
+
+        {selectedFile && (
+          <p className="mt-4 text-gray-700">
+            Selected File: <strong>{selectedFile.name}</strong>
+          </p>
+        )}
+
+        <Button
+          onClick={handleUpload}
+          className="mt-4 bg-teal-600 text-white px-4 py-2 rounded hover:bg-teal-700 transition"
+        >
+          Upload File
+        </Button>
+
+        {uploadMessage && (
+          <p className="mt-4 text-center text-sm text-gray-700">{uploadMessage}</p>
+        )}
+
+        {serverResponse && (
+          <pre className="mt-4 bg-gray-200 p-4 rounded text-sm">
+            {serverResponse}
+          </pre>
+        )}
       </div>
     </div>
   );
 };
 
-export default ChatPage;
+export default UploadChatPage;

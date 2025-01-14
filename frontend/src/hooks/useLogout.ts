@@ -13,6 +13,7 @@ export const useLogout = (): LogoutHook =>{
         try{
             // await api.post('/api/user/logout');
             localStorage.removeItem("token");
+            localStorage.removeItem("user_id");
             dispatch(removeUser());
         } catch(error){
             console.error('Logout failed', error);
