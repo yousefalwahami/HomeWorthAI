@@ -4,6 +4,7 @@ import { useAppDispatch, useAppSelector } from './redux/store';
 import { addUser, removeUser } from "@/redux/features/userSlice";
 import { useEffect, useState } from 'react';
 import api from './lib/axios';
+import { ThemeProvider } from "@/components/theme-provider"
 import HomePage from './pages/HomePage';
 import Login from './pages/Login';
 import ChatPage from './pages/Chat';
@@ -47,17 +48,19 @@ function App() {
 
   return (
     <Router>
-      <div className="min-h-screen h-fit bg-white">
-        {/*<Navbar /> */}
-        { shouldShowNavbar && <Navbar /> }
-        <Routes>
-          <Route path='/login' element={!user ? <Login /> : <Navigate to='/' />} />
-          <Route path='/' element={!user ? <Login /> : <Navigate to='/home' />} />
-          <Route path='/signup' element={!user ? <SignUp /> : <Navigate to='/home' />} />
-          <Route path='/home' element={user ? <HomePage /> : <Navigate to='/login' />} />
-          <Route path='/chat' element={user ? <ChatPage/> : <Navigate to='/login' />} />
-        </Routes>
-      </div>
+      <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
+        <div className="min-h-screen h-fit bg-white">
+          {/*<Navbar /> */}
+          { shouldShowNavbar && <Navbar /> }
+          <Routes>
+            <Route path='/login' element={!user ? <Login /> : <Navigate to='/' />} />
+            <Route path='/' element={!user ? <Login /> : <Navigate to='/home' />} />
+            <Route path='/signup' element={!user ? <SignUp /> : <Navigate to='/home' />} />
+            <Route path='/home' element={user ? <HomePage /> : <Navigate to='/login' />} />
+            <Route path='/chat' element={user ? <ChatPage/> : <Navigate to='/login' />} />
+          </Routes>
+        </div>
+        </ThemeProvider>
     </Router>
   )
 }
