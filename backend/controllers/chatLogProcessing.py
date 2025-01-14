@@ -1,4 +1,4 @@
-from fastapi import APIRouter, File, UploadFile
+from fastapi import APIRouter, File, HTTPException, UploadFile
 import os
 from utils.pinecone import extract_insights_from_chatlog, generate_embeddings, store_embeddings_in_pinecone
 from database.database import get_connection
@@ -11,9 +11,12 @@ router = APIRouter()
 #file: UploadFile means that the file type will be of type upload file
 #File(...) lets Fast API know it will be coming from the requests multipart/form-data body.
 @router.post("/process_chatlog")
-async def process_chatlog(file: UploadFile = File(...)):
+async def process_chatlog(file: UploadFile = File(...), user_id: int = None):
+    if not user_id:
+        raise HTTPException(status_code=400, detail="User ID is required") 
+    
+    '''
     # Step 1: Save chat log locally
-    # TODO: not save chat logs locally.. 
     file_path = f"chatlogs/{file.filename}"
     os.makedirs("chatlogs", exist_ok=True)
     with open(file_path, "wb") as f:
@@ -22,23 +25,33 @@ async def process_chatlog(file: UploadFile = File(...)):
     # Step 2: Read chat log content
     with open(file_path, "r", encoding='utf-8') as fi:
         chatlog_content = fi.read()
+    '''
+
+    chatlog_content = await file.read()
+    chatlog_content = chatlog_content.decode('utf-8')
     
     # Step 3: Extract insights using Llama
     dict_item_context = extract_insights_from_chatlog(chatlog_content)
+
+    if not dict_item_context.get("items"):
+        raise HTTPException(status_code=400, detail="No insights extracted from the chat log.")
+    
     
     # Step 4: Generate embeddings
     embeddings = generate_embeddings(dict_item_context)
 
     #Step 6: save data to db
     chat_id = save_chatlog_to_db(
-        user_id=1, 
+        user_id=user_id, 
         chat_title=file.filename
     )
 
+    if not chat_id:
+        raise HTTPException(status_code=500, detail="Error saving chat log to the database.")
 
     if dict_item_context.get("messages", []) and chat_id:
         dict_item_context = save_message_to_db(dict_item_context, chat_id=chat_id)
-        store_embeddings_in_pinecone(dict_item_context, embeddings, chat_id=chat_id, file=file.filename)
+        store_embeddings_in_pinecone(dict_item_context, embeddings, chat_id=chat_id, file=file.filename, user_id=user_id)
         
     
     return {

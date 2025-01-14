@@ -1,14 +1,14 @@
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import './App.css'
-
-import HomePage from './pages/HomePage';
-import Login from './pages/Login';
 import { useAppDispatch, useAppSelector } from './redux/store';
 import { addUser, removeUser } from "@/redux/features/userSlice";
-import SignUp from './pages/SignUp';
-import Navbar from './components/navbar';
 import { useEffect, useState } from 'react';
 import api from './lib/axios';
+import HomePage from './pages/HomePage';
+import Login from './pages/Login';
+import ChatPage from './pages/Chat';
+import SignUp from './pages/SignUp';
+import Navbar from './components/navbar';
 
 type userType = {
   email: string,
@@ -55,6 +55,7 @@ function App() {
           <Route path='/' element={!user ? <Login /> : <Navigate to='/' />} />
           <Route path='/signup' element={!user ? <SignUp /> : <Navigate to='/' />} />
           <Route path='/home' element={user ? <HomePage /> : <Navigate to='/login' />} />
+          <Route path='/chat' element={user ? <ChatPage/> : <Navigate to='/login' />} />
         </Routes>
       </div>
     </Router>

@@ -22,10 +22,26 @@ async def nebius_chat(prompt: str):
   if not prompt:
     raise HTTPException(status_code=400, detail="Prompt cannot be empty.")
   try:
+    # Key item from user
+    key_item = extract_key_item_from_prompt(prompt)
+
+    # Using key item, get info from vector db
+    key_item_embedding = generate_query_embedding(key_item)
+    pc_response = search_in_pinecone(key_item_embedding)
+
     # Call the Nebius API with the model and prompt
     completion = client.chat.completions.create(
       model="meta-llama/Meta-Llama-3.1-70B-Instruct-fast",
-      messages=[{"role": "user", "content": prompt}],
+      # messages=[{"role": "user", "content": prompt}],
+      messages = [{
+          "role": "system",
+          "content": "You are to recieve metadata about something that the user is looking for."
+        },
+        {
+          "role": "user",
+          "content": f"Using this metadata, give me a proper response explaining where I can find {key_item} using this:\n{pc_response}"
+        }
+      ],
       temperature=0.6,
       max_tokens=512,
       top_p=0.9
@@ -40,14 +56,6 @@ async def nebius_chat(prompt: str):
     except Exception as e:
       print(e)
     '''
-
-    # Key item from user
-    try:
-      key_item = extract_key_item_from_prompt(str)
-      print('key: ', key_item)
-    except Exception as e:
-      print("unsuccessful: ", e)
-
 
     return {"response": response}
 
@@ -77,9 +85,10 @@ def extract_key_item_from_prompt(prompt: str):
   print(response)
   print('Key Item Found: ', key_item)
 
-
+  '''
   key_item_embedding = generate_query_embedding(key_item)
   pc_response = search_in_pinecone(key_item_embedding)
   print('pinecone response: ', pc_response)
+  '''
 
-  return pc_response
+  return key_item

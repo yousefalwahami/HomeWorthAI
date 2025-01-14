@@ -139,7 +139,7 @@ def generate_query_embedding(key_item):
     return query_embedding
 
 
-def store_embeddings_in_pinecone(dict_item_context, embeddings, chat_id, file):
+def store_embeddings_in_pinecone(dict_item_context, embeddings, chat_id, file, user_id):
     """
     Stores embeddings in Pinecone with metadata.
 
@@ -157,7 +157,8 @@ def store_embeddings_in_pinecone(dict_item_context, embeddings, chat_id, file):
                 "message_id": dict_item_context["ids"][i],
                 "item": dict_item_context["items"][i],
                 "context": dict_item_context["context"][i],
-                "message": dict_item_context["messages"][i]
+                "message": dict_item_context["messages"][i],
+                "user_id": user_id
             }
         }
         for i, embedding in enumerate(embeddings)

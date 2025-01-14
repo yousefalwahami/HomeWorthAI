@@ -70,7 +70,7 @@ def save_image_to_db(user_id, filename, items, image_data):
             conn.close()
 
 @router.post("/detect_objects")
-async def detect_objects(file: UploadFile = File(...)):
+async def detect_objects(file: UploadFile = File(...), user_id: int = None):
   # Read the image file
   image_bytes = await file.read()
   image = Image.open(BytesIO(image_bytes))
@@ -130,7 +130,7 @@ async def detect_objects(file: UploadFile = File(...)):
   print("Unique Classes (Items):", items)
 
   save_image_to_db(
-    user_id=1,  # You should dynamically determine the user ID
+    user_id=user_id,  # You should dynamically determine the user ID
     filename=file.filename,
     items=items,
     image_data=image_bytes  # Directly use image bytes here
