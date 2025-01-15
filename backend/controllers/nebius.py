@@ -1,4 +1,5 @@
 import os
+import traceback
 from openai import OpenAI
 from fastapi import APIRouter, File, Form, HTTPException, UploadFile
 from dotenv import load_dotenv
@@ -34,13 +35,24 @@ async def nebius_chat(data: dict):
   try:
     # Key item from user
     key_item = extract_key_item_from_prompt(prompt)
-    print(key_item)
+    print('key_item: ', key_item)
 
     # Using key item, get info from vector db
     key_item_embedding = generate_query_embedding(key_item)
 
     pc_response = search_in_pinecone(key_item_embedding, user_id, "message")
+    pc_response_img = search_in_pinecone(key_item_embedding, user_id, "image")
+
+    print('RES: ', pc_response)
+    print('IMG: ', pc_response_img)
+
     
+    if not pc_response_img:
+      img_response = {"message": "No matching objects found", "results": []}
+    else:
+      img_response = {"message": "Search successful", "results": pc_response_img}
+
+
     formatted_messages = [
           {"role": "user" if msg["sender"] == "user" else "assistant", "content": msg["text"]}
           for msg in message_from_frontend 
@@ -76,13 +88,13 @@ async def nebius_chat(data: dict):
     response = json.loads(completion.to_json())
 
     return {"response": response}
+    
 
   except Exception as e:
     print(e)
     raise HTTPException(status_code=500, detail=f"Error calling Nebius API: {str(e)}")
 
 
-# @router.post("/prompt-chat")
 def extract_key_item_from_prompt(prompt: str):
   completion = client.chat.completions.create(
     model="meta-llama/Meta-Llama-3.1-8B-Instruct-fast",

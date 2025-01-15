@@ -53,9 +53,9 @@ async def process_chatlog(file: UploadFile = File(...), user_id: int = Body(...)
 
     if dict_item_context.get("messages", []) and chat_id:
         dict_item_context = save_message_to_db(dict_item_context, chat_id=chat_id)
-        store_embeddings_in_pinecone(dict_item_context, embeddings, chat_id=chat_id, file=file.filename, user_id=user_id)
-        
-    
+        store_embeddings_in_pinecone(dict_item_context, embeddings, chat_id=chat_id, file=file.filename, user_id=user_id, image_id=0, type="message")
+
+
     return {
         "message": "Chat log processed successfully",
         "items": dict_item_context["items"],
@@ -69,21 +69,17 @@ def save_chatlog_to_db(user_id, chat_title):
     cursor = None
 
     try:
-        # Prepare SQL query to insert the chat log and return the chat_id
         query = f"""
             INSERT INTO chat_logs (user_id, chat_title)
             VALUES (%s, %s) RETURNING chat_id
         """
         cursor = conn.cursor()
-
-        # Execute the query
         cursor.execute(query, (user_id, chat_title))
-        
-        # Retrieve the chat_id
         chat_id = cursor.fetchone()['chat_id']
-
-        # Commit the transaction
         conn.commit()
+
+        #cursor.close()
+        #conn.close()
 
         return chat_id
 
