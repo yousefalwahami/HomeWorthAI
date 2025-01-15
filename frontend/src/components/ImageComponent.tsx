@@ -8,8 +8,6 @@ interface ImageComponentProps {
 
 const ImageComponent: React.FC<ImageComponentProps> = ({ imageId }) => {
   const [imageUrl, setImageUrl] = useState<string | null>(null);
-  console.log(imageUrl);
-
   useEffect(() => {
     const fetchImage = async () => {
       try {

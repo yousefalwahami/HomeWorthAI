@@ -36,7 +36,7 @@ export default function Navbar(): JSX.Element{
         <div>
             <nav className='w-full flex flex-row justify-between items-center px-10 py-6 font-Montserrat'>
                 <Link to="/" className="flex flex-row items-center">
-                    <p className="text-2xl font-bold leading-10 text-center bg-gradient-to-r from-green-500 to-green-700 to-black text-transparent bg-clip-text">
+                    <p className="text-2xl font-bold leading-10 text-center bg-gradient-to-r from-green-500 via-green-700 to-black text-transparent bg-clip-text">
                         HomeWorthAI
                     </p>
                     <img src='/logo-cropped.svg' className="pl-2 h-5 mb-1"/>

@@ -68,10 +68,10 @@ async def nebius_chat(data: dict):
           *formatted_messages,
           {
             "role": "user",
-            "content": f'''Here are some related messages and detected items in the images related to the user message ensure to let the user know about this: 
-            {['image' + str(i) + "items: " + pc_image_response[i]['items'] for i in range(len(pc_image_response))]} 
-            messages: {["Found " + pc_chat_response[i]['item'] + "in " + pc_chat_response[i]['message'] for i in range(len(pc_chat_response))]}, 
-            user message: {prompt}'''
+            "content": f'''Here are some related messages and detected items in the images related to the user message. Ensure to let the user know about this:
+            {', '.join(["image" + str(i) + " items: " + str(pc_image_response[i]['items']) for i in range(len(pc_image_response))])}
+            Messages: {', '.join(["Found " + str(pc_chat_response[i]['item']) + " in " + str(pc_chat_response[i]['message']) for i in range(len(pc_chat_response))])},
+            User message: {prompt}'''
           }
         ],
         temperature=0.6,
