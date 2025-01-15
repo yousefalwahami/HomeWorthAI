@@ -17,9 +17,7 @@ client = OpenAI(
   api_key=os.environ.get("NEBIUS_API_KEY")  # Ensure your API key is set in the environment
 )
 
-# Route for sending a prompt to the model
 @router.post("/nebius-chat")
-#async def nebius_chat(prompt: str = Form(...), file: UploadFile = File(None), user_id: str = Form(...)):
 async def nebius_chat(data: dict):
   prompt = data.get('prompt')
   user_id = data.get('user_id')
@@ -30,15 +28,13 @@ async def nebius_chat(data: dict):
   if not prompt:
     raise HTTPException(status_code=400, detail="Prompt cannot be empty.")
   try:
-    # Key item from user
     key_item = extract_key_item_from_prompt(prompt)
-
-    # Using key item, get info from vector db
     key_item_embedding = generate_query_embedding(key_item)
     
+
+    # only being used in final_response
     pc_chat_response = None
     pc_image_response = None
-
     if(searchChat):
       pc_chat_response = search_in_pinecone(key_item_embedding, user_id, "message")
 
@@ -47,17 +43,14 @@ async def nebius_chat(data: dict):
    
     
     formatted_messages = [
-          {"role": "user" if msg["sender"] == "user" else "assistant", "content": msg["text"]}
-          for msg in message_from_frontend 
-      ]
+      {"role": "user" if msg["sender"] == "user" else "assistant", "content": msg["text"]}
+      for msg in message_from_frontend 
+    ]
     
     formatted_messages = formatted_messages[-4:] if len(formatted_messages) > 4 else formatted_messages
     
-
-    # Call the Nebius API with the model and prompt
     completion = client.chat.completions.create(
       model="meta-llama/Llama-3.3-70B-Instruct",
-      # messages=[{"role": "user", "content": prompt}],
       messages = [{
           "role": "system",
           "content": '''Your goal is to act as an AI chat bot to help people who have lost there home remember items lost in there home. 
@@ -80,7 +73,14 @@ async def nebius_chat(data: dict):
     # Return the completion response
     response = json.loads(completion.to_json())
 
-    return {"response": response}
+    final_response = {
+      "response": response,
+      "pc_chat_response": pc_chat_response,
+      "pc_image_response": pc_image_response
+    }
+
+    # return {"response": response}
+    return final_response
     
 
   except Exception as e:
@@ -108,7 +108,6 @@ def extract_key_item_from_prompt(prompt: str):
     temperature=0
   )
   
-  # Parse the response
   response = json.loads(completion.to_json())
   print(response)
   key_item = response['choices'][0]['message']['content'].split('*')
