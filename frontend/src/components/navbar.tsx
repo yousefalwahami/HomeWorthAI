@@ -29,7 +29,7 @@ export default function Navbar(): JSX.Element{
         navigate('/');
     }
 
-    const hideNavbarRoutes = ['/chat', '/upload-chat', '/home'];
+    const hideNavbarRoutes = ['/chat', '/upload-chat', '/home', '/itinerary'];
     const shouldShowNavbar = hideNavbarRoutes.includes(location.pathname);
 
     return(
