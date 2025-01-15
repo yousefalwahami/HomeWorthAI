@@ -10,6 +10,7 @@ from detectron2 import model_zoo
 from PIL import Image, ImageDraw
 from detectron2.data import MetadataCatalog
 from transformers import CLIPProcessor, CLIPModel
+from utils.pinecone import query_index, store_embeddings_in_pinecone
 from database.database import get_connection
 from datetime import datetime
 
@@ -39,43 +40,50 @@ router = APIRouter()
 
 def save_image_to_db(user_id, filename, items, image_data):
   conn = get_connection()
-  cursor = conn.cursor()
+  cursor = None
 
   try:
     query = f"""
       INSERT INTO images (user_id, filename, items, image_data, uploaded_at)
-      VALUES (%s, %s, %s, %s, %s)
+      VALUES (%s, %s, %s, %s, %s) RETURNING image_id
     """
-
-    # Execute the query with the parameters
+    cursor = conn.cursor()
     cursor.execute(query, (user_id, filename, items, image_data, datetime.now()))
-
-    # Commit the transaction
+    image_id = cursor.fetchone()['image_id']
     conn.commit()
-
-    # Close the cursor and connection
     cursor.close()
     conn.close()
 
-    print(f"Image '{filename}' uploaded successfully!")
+    return image_id
 
   except Exception as e:
     print("Error saving image to DB:", e)
+    return None
   
   finally:
-    # Ensure the cursor and connection are closed properly
     if cursor:
       cursor.close()
     if conn:
       conn.close()
 
 
-#AVNOOR WILL ADD TO THE DATABASE HERE
 @router.post("/detect_objects")
 async def detect_objects(file: UploadFile = File(...), user_id: int = None):
   # Read the image file
   image_bytes = await file.read()
   image = Image.open(BytesIO(image_bytes))
+  image_inputs = clip_processor(images=image, return_tensors="pt")
+
+    # Get the image embedding from CLIP (returns a tensor with shape [batch_size, 512])
+  with torch.no_grad():
+    image_embeddings = clip_model.get_image_features(**image_inputs)
+
+  # Convert the embedding to a numpy array or directly use the tensor (if needed)
+  image_embeddings = image_embeddings.cpu().numpy()
+
+  # The image embedding is now a 512-dimensional vector
+  print(image_embeddings.shape)  # Should output (1, 512)
+
 
   # Convert to a format Detectron2 can use (numpy array)
   image = image.convert("RGB")
@@ -92,18 +100,20 @@ async def detect_objects(file: UploadFile = File(...), user_id: int = None):
 
   # Extract object labels
   detected_labels = [COCO_CLASSES[cls] for cls in classes if cls < len(COCO_CLASSES)]
-
+  '''
   # Generate embeddings using CLIP for detected object labels
   inputs = clip_processor(text=detected_labels, return_tensors="pt", padding=True)
   with torch.no_grad():
     text_embeddings = clip_model.get_text_features(**inputs)
   text_embeddings = text_embeddings.cpu().numpy()  # Convert to numpy for easier handling
+  
 
   # Metadata for the objects
   results = [
     {"bbox": box.tolist(), "score": float(score), "class": COCO_CLASSES[cls], "embedding": embedding.tolist()}
     for box, score, cls, embedding in zip(boxes, scores, classes, text_embeddings)
   ]
+  
 
   # Draw bounding boxes on the image
   draw = ImageDraw.Draw(image)
@@ -121,21 +131,33 @@ async def detect_objects(file: UploadFile = File(...), user_id: int = None):
   img_byte_arr = BytesIO()
   image.save(img_byte_arr, format='PNG')
   img_byte_arr.seek(0)
-
+  '''
   # Collect unique classes from detection results
   unique_classes = list(set(detected_labels))  # Use a set to remove duplicates
   items = ", ".join(unique_classes)  # Convert the unique classes into a comma-separated string
 
+  '''
   # Log the results for debugging
   print("Detection Results with Embeddings:")
   print(results)
   print("Unique Classes (Items):", items)
+  '''
+  
 
-  save_image_to_db(
+  image_id = save_image_to_db(
     user_id=user_id, 
     filename=file.filename,
     items=items,
     image_data=image_bytes  
   )
 
-  return {"detections": results}
+  print(image_id)
+  print(user_id)
+  print(items)
+  dict_item_context = {"items": unique_classes}
+  embedding_result = store_embeddings_in_pinecone(dict_item_context=dict_item_context, embeddings=image_embeddings, chat_id=0, file=file.filename, user_id=user_id, image_id=image_id, type="image")
+  #print(query_index(image_embeddings))
+  
+
+  # return {"detections": results}
+  return {"detections": embedding_result}

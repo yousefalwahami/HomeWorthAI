@@ -1,4 +1,5 @@
 import os
+import traceback
 from openai import OpenAI
 from fastapi import APIRouter, File, Form, HTTPException, UploadFile
 from dotenv import load_dotenv
@@ -79,13 +80,13 @@ async def nebius_chat(data: dict):
     response = json.loads(completion.to_json())
 
     return {"response": response}
+    
 
   except Exception as e:
     print(e)
     raise HTTPException(status_code=500, detail=f"Error calling Nebius API: {str(e)}")
 
 
-# @router.post("/prompt-chat")
 def extract_key_item_from_prompt(prompt: str):
   completion = client.chat.completions.create(
     model="meta-llama/Meta-Llama-3.1-8B-Instruct-fast",

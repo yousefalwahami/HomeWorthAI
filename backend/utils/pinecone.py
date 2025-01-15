@@ -44,6 +44,7 @@ index = pc.Index(index_name)
 
 # Query the index to check the inserted vectors
 result = index.describe_index_stats()
+print('inserted vectors: ', result)
 
 def clear_index():
     """
@@ -59,8 +60,18 @@ def clear_index():
     except Exception as e:
         print(f"Error clearing the index '{index_name}': {e}")
 
+# this dont work
 def query_index(query_vector):
+    index_stats = index.describe_index_stats()
+    print('W: ', index_stats['total_vector_count'])
+    '''
+    query_vector = query_vector.tolist()
     response = index.query(query_vector=query_vector, top_k=1)
+    '''
+    response = index.query(query_vector=query_vector, top_k=1)
+
+    index_stats =  index.describe_index_stats()
+    print('W? ', index_stats['total_vector_count'])
     return response
 
 
@@ -138,7 +149,7 @@ def generate_query_embedding(key_item):
     return query_embedding
 
 
-def store_embeddings_in_pinecone(dict_item_context, embeddings, chat_id, file, user_id):
+def store_embeddings_in_pinecone(dict_item_context, embeddings, chat_id, file, user_id, image_id, type):
     """
     Stores embeddings in Pinecone with metadata.
 
@@ -147,26 +158,42 @@ def store_embeddings_in_pinecone(dict_item_context, embeddings, chat_id, file, u
         embeddings (list): List of embeddings corresponding to each item-context pair.
         filename (str): Name of the uploaded file (used as a unique identifier).
     """
-    pinecone_data = [
-        {
-            "id": file + '_' + str(dict_item_context["ids"][i]),
-            "values": embedding.tolist(),  # Convert NumPy array to list
-            "metadata": {
-                "chat_id": chat_id,
-                "message_id": dict_item_context["ids"][i],
-                "type": "message",
-                "item": dict_item_context["items"][i],
-                "context": dict_item_context["context"][i],
-                "message": dict_item_context["messages"][i],
-                "user_id": user_id
+    if (type=="message"):
+        pinecone_data = [
+            {
+                "id": file + '_' + str(dict_item_context["ids"][i]),
+                "values": embedding.tolist(),  # Convert NumPy array to list
+                "metadata": {
+                    "chat_id": chat_id,
+                    "message_id": dict_item_context["ids"][i],
+                    "type": type,
+                    "item": dict_item_context["items"][i],
+                    "context": dict_item_context["context"][i],
+                    "message": dict_item_context["messages"][i],
+                    "user_id": user_id
+                }
             }
-        }
-        for i, embedding in enumerate(embeddings)
-    ]
+            for i, embedding in enumerate(embeddings)
+        ]
+    else:
+        pinecone_data = [
+            {
+                "id": file + '_' + str(image_id),
+                "values": embedding.tolist(),  # Convert NumPy array to list
+                "metadata": {
+                    "type": type,
+                    "image_id": image_id,
+                    "user_id": user_id,
+                    "items": dict_item_context["items"][i],
+                }
+            }
+            for i, embedding in enumerate(embeddings)
+        ]
 
     # Upsert data into Pinecone
     try:
         index.upsert(vectors=pinecone_data)
+        return pinecone_data
     except Exception as e:
         print(f"Error upserting data to Pinecone: {e}")
         raise
