@@ -47,7 +47,7 @@ const Message = ({ person, text }: { person: string, text: string }) => {
         >
           {text}
         </p>
-        <a onClick={handleClick} className={`underline cursor-pointer start-end self-end text-sm pt-2
+        <a onClick={handleClick} className={`underline cursor-pointer self-start z-30 text-sm pt-2
           ${
             person == "user" ? "hidden" 
             : person === "bot" ?

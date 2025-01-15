@@ -20,6 +20,7 @@ const ChatComponent: React.FC<ChatComponentProps> = ({ user_id }) => {
   const [inputText, setInputText] = useState<string>('');
   const [searchChat, setSearchChat] = useState(false);
   const [searchImage, setSearchImages] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const { setChatResponses, setImageResponses } = useSharedData();
 
@@ -39,6 +40,7 @@ const ChatComponent: React.FC<ChatComponentProps> = ({ user_id }) => {
       return;
     }
 
+    setIsLoading(true);
     setMessages((prevMessages) => [
       ...prevMessages,
       { sender: 'user', text: inputText },
@@ -73,12 +75,14 @@ const ChatComponent: React.FC<ChatComponentProps> = ({ user_id }) => {
       };
 
       setMessages((prevMessages) => [...prevMessages, botMessage]);
+      setIsLoading(false);
     } catch (error) {
       console.error('Error sending message:', error);
       setMessages((prevMessages) => [
         ...prevMessages,
         { sender: 'bot', text: 'Error processing chat log.' },
       ]);
+      setIsLoading(false);
     }
   };
 
@@ -88,6 +92,15 @@ const ChatComponent: React.FC<ChatComponentProps> = ({ user_id }) => {
         {messages.map((message, index) => (
           <Message key={index} text={message.text} person={message.sender} />
         ))}
+        {isLoading && (
+          <div className="self-start bg-green-200 rounded-3xl p-4">
+            <div className="flex items-center justify-center h-5">
+              <div className="dot"></div>
+              <div className="dot"></div>
+              <div className="dot"></div>
+            </div>
+          </div>
+        )}
       </div>
 
       <form onSubmit={sendMessage} className="space-y-4 mt-4">

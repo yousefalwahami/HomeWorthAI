@@ -2,10 +2,12 @@ import { Button } from "./ui/button";
 import {
     NavigationMenu,
     NavigationMenuContent,
+    NavigationMenuIndicator,
     NavigationMenuItem,
     NavigationMenuLink,
     NavigationMenuList,
     NavigationMenuTrigger,
+    NavigationMenuViewport,
     navigationMenuTriggerStyle
   } from "./ui/navigation-menu";
 

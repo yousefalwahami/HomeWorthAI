@@ -2,7 +2,6 @@ import React, { useState, useRef } from 'react';
 import api from '@/lib/axios';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Checkbox } from "@/components/ui/checkbox";
 
 const UploadChatPage: React.FC = () => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -117,10 +116,20 @@ const UploadChatPage: React.FC = () => {
             Upload File
           </Button>
           <div className="flex items-center ml-4">
-            <Checkbox
-              id="toggleUpload"
+            <Button 
+              id="toggleUpload" 
+              variant="outline" 
+              aria-label="Toggle upload type" 
               onClick={handleToggleUploadType}
-            />
+              className="relative w-12 h-6 rounded-full border-2 border-gray-300 flex items-center px-0.5"
+            >
+              <div 
+                className={`w-5 h-5 bg-teal-600 rounded-full transition-transform duration-200 ease-in-out ${
+                  isChatOrImage ? 'translate-x-[12px]' : '-translate-x-[12px]'
+                }`}
+              />
+            </Button>
+
             <label htmlFor="toggleUpload" className="ml-2 text-gray-700">
               {isChatOrImage ? "Switch to Chat" : "Switch to Image"}
             </label>
