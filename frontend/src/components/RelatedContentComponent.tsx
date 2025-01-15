@@ -60,6 +60,11 @@ const RelatedContentComponent: React.FC = () => {
     }
   };
 
+  const handleOnOpenChange = () => {
+    setIsIOpen(false);
+    setImageUrl("");
+  }
+
   useEffect(() => {
     if (scrollRef.current) {
       const { scrollHeight, clientHeight } = scrollRef.current;
@@ -98,7 +103,7 @@ const RelatedContentComponent: React.FC = () => {
                 onClick={() => handleOpenDialogImage(response.image_id)}
               >
                 <div>
-                  <p><strong>Item: </strong> {response.items}</p>
+                  <p><strong>Item(s): </strong> {Array.isArray(response.items) ? response.items.join(', ') : ''}</p>
                   <p><strong>Filename: </strong> {response.filename}</p>
                 </div>
 
@@ -137,7 +142,7 @@ const RelatedContentComponent: React.FC = () => {
           <DialogHeader>
             <DialogTitle>Full Chatlog</DialogTitle>
           </DialogHeader>
-          <DialogDescription className="max-h-[60vh] overflow-y-auto">
+          <DialogDescription className="max-h-[60vh] overflow-y-auto hide-scrollbar">
             {chatLog.split('\n').map((message, index) => {
               const [sender, text] = message.split(': ');
               if (!text) return null; // Skip invalid messages
@@ -154,16 +159,16 @@ const RelatedContentComponent: React.FC = () => {
       </Dialog>
 
       {/* Dialog modal for images */}
-      <Dialog open={isIOpen} onOpenChange={setIsIOpen}>
+      <Dialog open={isIOpen} onOpenChange={handleOnOpenChange}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Bigger picture</DialogTitle>
           </DialogHeader>
-          <DialogDescription className="max-h-[60vh] overflow-y-auto">
+          <DialogDescription className="max-h-[60vh] overflow-y-auto hide-scrollbar">
           { 
             imageUrl ? (
               <div>
-                <img src={imageUrl} alt="Fetched Image"  />
+                <img src={imageUrl} alt="Fetched Image" />
               </div>
             ) : (
               <div>
