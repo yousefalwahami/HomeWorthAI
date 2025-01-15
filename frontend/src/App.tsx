@@ -12,6 +12,7 @@ import SignUp from './pages/SignUp';
 import UploadChat from './pages/UploadChat'
 import Navbar from './components/navbar';
 import { LoaderCircle } from 'lucide-react';
+import { SharedDataProvider } from './components/SharedDataProvider';
 
 type userType = {
   email: string,
@@ -62,7 +63,11 @@ function App() {
             <Route path='/' element={!user ? <Login /> : <Navigate to='/home' />} />
             <Route path='/signup' element={!user ? <SignUp /> : <Navigate to='/home' />} />
             <Route path='/home' element={user ? <HomePage /> : <Navigate to='/login' />} />
-            <Route path='/chat' element={user ? <ChatPage/> : <Navigate to='/login' />} />
+            <Route path='/chat' element={user ?
+              <SharedDataProvider>
+                <ChatPage/>
+              </SharedDataProvider>
+               : <Navigate to='/login' />} />
             <Route path='/upload-chat' element={user ? <UploadChat/> : <Navigate to='/login' />} />
           </Routes>
         </div>
