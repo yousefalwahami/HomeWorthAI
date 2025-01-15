@@ -6,7 +6,7 @@ from controllers.nebius import router as nebius_router
 from controllers.upload_backup import router as upload_backup_router
 from controllers.authentication import router as authentication_router
 from database.database import get_connection
-from utils.pinecone import clear_index
+from backend.utils.pinecone_db import clear_index
 
 app = FastAPI()
 '''
