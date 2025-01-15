@@ -167,3 +167,38 @@ def parse_message(message):
 
     return None
 
+# router to test function
+#@router.get("/chatlog_from_chatid")
+def chatlog_from_chatid(chatid):
+    conn = get_connection()
+    cursor = None
+
+    try:
+        query = f"""
+            SELECT
+                *
+            FROM
+                messages
+            WHERE
+                chat_id = %s
+            ORDER BY
+                timestamp DESC
+        """
+        cursor = conn.cursor()
+        cursor.execute(query, (chatid))
+        result = cursor.fetchall()
+
+        cursor.close()
+        conn.close()
+
+        return result
+
+    except Exception as e:
+        print(f"Error fetching all chats of chatid: {chatid}: ", e)
+        return None
+
+    finally:
+        if cursor:
+            cursor.close()
+        if conn:
+            conn.close()
