@@ -4,6 +4,7 @@ import { Button } from "./ui/button";
 import { Input } from './ui/input';
 import { Checkbox } from './ui/checkbox';
 import Message from './Message';
+import { useSharedData } from '@/components/SharedDataProvider';
 
 interface Message {
   sender: 'user' | 'bot';
@@ -19,6 +20,9 @@ const ChatComponent: React.FC<ChatComponentProps> = ({ user_id }) => {
   const [inputText, setInputText] = useState<string>('');
   const [searchChat, setSearchChat] = useState(false);
   const [searchImage, setSearchImages] = useState(false);
+
+
+  const { setChatResponses, setImageResponses } = useSharedData();
 
   const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
     setInputText(e.target.value);
@@ -55,6 +59,14 @@ const ChatComponent: React.FC<ChatComponentProps> = ({ user_id }) => {
       const response = await axios.post('http://localhost:8000/api/nebius-chat', payload, {
         headers: { 'Content-Type': 'application/json' },
       });
+
+      const { pc_chat_response, pc_image_response } = response.data;
+      
+      // Push the data to shared context
+      setChatResponses(pc_chat_response || [])
+      setImageResponses(pc_image_response || [])
+
+      console.log('res:', response);
 
       const botMessage: Message = {
         sender: 'bot',

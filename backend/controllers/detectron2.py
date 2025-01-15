@@ -1,5 +1,5 @@
 import os
-from fastapi import APIRouter, File, UploadFile
+from fastapi import APIRouter, File, HTTPException, UploadFile
 from fastapi.responses import StreamingResponse
 from io import BytesIO
 import torch
@@ -161,3 +161,46 @@ async def detect_objects(file: UploadFile = File(...), user_id: int = None):
 
   # return {"detections": results}
   return {"detections": embedding_result}
+
+
+@router.get("/get_image/{image_id}")
+async def get_image(image_id: int):
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    try:
+        print(f"Fetching image for image_id: {image_id}")
+
+        # Query to get image data
+        cursor.execute("SELECT image_data FROM images WHERE image_id = %s", (image_id,))
+        image_data = cursor.fetchone()
+        print("Raw image_data fetched from DB:", image_data)
+
+        # Check if image was found
+        if not image_data or not image_data[0]:
+            raise HTTPException(status_code=404, detail="Image not found or image data is empty.")
+
+        # Convert memoryview to bytes
+        image_bytes = bytes(image_data[0])
+        print("Length of image bytes:", len(image_bytes))
+
+        # Convert the image bytes to a file-like object and open the image using PIL
+        image = Image.open(BytesIO(image_bytes))
+
+        # Save the image to a BytesIO object
+        img_byte_arr = BytesIO()
+        image.save(img_byte_arr, format="PNG")
+        img_byte_arr.seek(0)
+        print("Image successfully processed.")
+
+        # Return the image as a StreamingResponse
+        return StreamingResponse(img_byte_arr, media_type="image/png")
+
+    except Exception as e:
+        print(f"Error: {e}")
+        raise HTTPException(status_code=500, detail=f"Error fetching image: {e}")
+
+    finally:
+        # Close the cursor and connection
+        cursor.close()
+        conn.close()

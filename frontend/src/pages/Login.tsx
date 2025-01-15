@@ -90,8 +90,8 @@ function Login(): JSX.Element {
     <div className='flex flex-col justify-center h-[calc(90vh-90px)] items-center w-full'>
       <Card className="w-[400px]">
       <CardHeader>
-        <CardTitle>Login</CardTitle>
-        <CardDescription>This is a basic login page</CardDescription>
+        <CardTitle className="text-2xl font-semibold text-center bg-gradient-to-r from-green-500 via-green-600 to-green-700 text-transparent bg-clip-text">Login</CardTitle>
+        <CardDescription>Sign in to your account</CardDescription>
       </CardHeader>
       <CardContent>
         <div className="grid w-full gap-4">

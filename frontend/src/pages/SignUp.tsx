@@ -91,8 +91,8 @@ function SignUp(): JSX.Element {
         <div className='flex flex-col items-center justify-center h-[calc(120vh-90px)] w-full'>
             <Card className="w-[400px]">
             <CardHeader>
-                <CardTitle>Sign up</CardTitle>
-                <CardDescription>This is a basic signup page</CardDescription>
+                <CardTitle className="text-2xl font-semibold text-center bg-gradient-to-r from-green-500 via-green-600 to-green-700 text-transparent bg-clip-text">Sign up</CardTitle>
+                <CardDescription>Create your account</CardDescription>
             </CardHeader>
             <CardContent>
                 <div className="grid w-full gap-4">

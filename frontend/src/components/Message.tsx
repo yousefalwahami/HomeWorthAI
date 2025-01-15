@@ -4,7 +4,7 @@ const Message = ({ person, text }: { person: string, text: string }) => {
         <div
           className={`relative w-[90%] h-fit z-20 mb-2 flex flex-col p-4 rounded-3xl ${
             person == "user"
-              ? "self-end items-end bg-green-100"
+              ? "self-end items-end bg-green-300"
               : "self-start items-start bg-green-200"
           }`}
         >
@@ -13,7 +13,7 @@ const Message = ({ person, text }: { person: string, text: string }) => {
             className={`absolute bottom-0 ${
               person === "user" ? "right-0" : "left-0"
             } w-10 h-10 ${
-              person === "user" ? "bg-green-100" : "bg-green-200"
+              person === "user" ? "bg-green-300" : "bg-green-200"
             }`}
           ></div>
   
