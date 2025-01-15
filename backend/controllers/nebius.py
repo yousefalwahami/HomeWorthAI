@@ -4,7 +4,7 @@ from openai import OpenAI
 from fastapi import APIRouter, File, Form, HTTPException, UploadFile
 from dotenv import load_dotenv
 import json
-from utils.pinecone import generate_query_embedding, search_in_pinecone
+from backend.utils.pinecone_db import generate_query_embedding, search_in_pinecone
 
 load_dotenv()
 

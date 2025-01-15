@@ -51,14 +51,11 @@ def clear_index():
     Clears all vectors from the Pinecone index without deleting the index.
     """
     try:
-        index_stats = Pinecone.describe_index(name=index_name)
-        print(index_stats['total_vector_count'])
-
         index.delete(delete_all=True)
-        index_stats = Pinecone.describe_index(name=index_name)
-        print(index_stats['total_vector_count'])
     except Exception as e:
         print(f"Error clearing the index '{index_name}': {e}")
+
+# clear_index() 
 
 # this dont work
 def query_index(query_vector):

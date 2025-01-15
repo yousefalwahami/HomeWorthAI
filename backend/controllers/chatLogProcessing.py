@@ -1,11 +1,11 @@
 from typing import Dict
 from fastapi import APIRouter, Body, File, HTTPException, UploadFile
 import os
-from utils.pinecone import extract_insights_from_chatlog, generate_embeddings, store_embeddings_in_pinecone
+from backend.utils.pinecone_db import extract_insights_from_chatlog, generate_embeddings, store_embeddings_in_pinecone
 from database.database import get_connection
 from datetime import datetime
 import re
-from utils.pinecone import generate_query_embedding, search_in_pinecone
+from backend.utils.pinecone_db import generate_query_embedding, search_in_pinecone
 
 router = APIRouter()
 
