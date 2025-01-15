@@ -30,7 +30,6 @@ export default function Navbar(): JSX.Element{
     }
 
     const hideNavbarRoutes = ['/chat', '/upload-chat', '/home'];
-    console.log(location.pathname)
     const shouldShowNavbar = hideNavbarRoutes.includes(location.pathname);
 
     return(
@@ -47,7 +46,7 @@ export default function Navbar(): JSX.Element{
                     <NavigationMenu className="flex">
                         {shouldShowNavbar && <NavigationMenuList>
                             <NavigationMenuItem >
-                            <NavigationMenuTrigger className="bg-gray-100">Options</NavigationMenuTrigger>
+                            <NavigationMenuTrigger className="bg-gray-100 text-lg">Options</NavigationMenuTrigger>
                             <NavigationMenuContent>
                                 <Link to="/home" >
                                     <NavigationMenuLink className={navigationMenuTriggerStyle()}>Home</NavigationMenuLink>
@@ -62,7 +61,7 @@ export default function Navbar(): JSX.Element{
                             </NavigationMenuItem>
                         </NavigationMenuList>}
                     </NavigationMenu>
-                    { user ? (<Button onClick={handleClick} variant = "ghost" className="text-lg h-[40px] hidden md:flex ">Log Out</Button>) : (<><Link to='/login'><Button variant = "ghost" className="text-lg h-[40px] hidden md:flex ">Log In</Button></Link><Link to="/signup"><Button variant = "outline" className="dark:text-white text-md mx-5 rounded-md h-[40px] hover:opacity-90 md:w-[84px] hidden md:flex">Sign up</Button></Link></>)}
+                    { user ? (<Button onClick={handleClick} variant = "ghost" className="text-lg h-[40px] flex ">Log Out</Button>) : (<><Link to='/login'><Button variant = "ghost" className="text-lg h-[40px] hidden md:flex ">Log In</Button></Link><Link to="/signup"><Button variant = "outline" className="dark:text-white text-md mx-5 rounded-md h-[40px] hover:opacity-90 md:w-[84px] hidden md:flex">Sign up</Button></Link></>)}
                 </div>
             </nav>
         </div>
