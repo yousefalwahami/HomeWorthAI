@@ -182,7 +182,7 @@ def chatlog_from_chatid(chatid: int):
                 timestamp DESC
         """
         cursor = conn.cursor()
-        cursor.execute(query, (chatid))
+        cursor.execute(query, (chatid,))
         result = cursor.fetchall()
 
         cursor.close()
