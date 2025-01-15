@@ -40,9 +40,14 @@ async def nebius_chat(data: dict):
     pc_image_response = None
 
     if(searchChat):
-      pc_chat_response = search_in_pinecone(key_item_embedding, user_id, "message")
-    elif(searchImage):
-      pc_image_response = search_in_pinecone(key_item_embedding, user_id, "message")
+      pc_chat_response = search_in_pinecone(key_item_embedding, user_id=1, type="message")
+
+    if(searchImage):
+      pc_image_response = search_in_pinecone(key_item_embedding, user_id, "image")
+
+    
+    print(pc_chat_response)
+    print(pc_image_response)
    
     
     formatted_messages = [
@@ -109,6 +114,7 @@ def extract_key_item_from_prompt(prompt: str):
   
   # Parse the response
   response = json.loads(completion.to_json())
+  print(response)
   key_item = response['choices'][0]['message']['content'].split('*')
 
-  return key_item[1]
+  return key_item[1] if len(key_item) > 1 else key_item[0]
