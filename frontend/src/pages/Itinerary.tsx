@@ -16,7 +16,6 @@ const ItineraryPage: React.FC = () => {
   const [images, setImages] = useState<string[]>([]);
   const [title, setTitle] = useState('');
   const [loading, setLoading] = useState(false);
-  const [pdfUrl, setPdfUrl] = useState<string | null>(null);
 
   const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setTitle(e.target.value);
@@ -38,12 +37,9 @@ const ItineraryPage: React.FC = () => {
         responseType: 'blob'
       });
 
-      // Create a blob URL for preview and download
+      // Create a blob URL and trigger download
       const blob = new Blob([response.data], { type: 'application/pdf' });
       const url = window.URL.createObjectURL(blob);
-      setPdfUrl(url);
-
-      // Create download link
       const link = document.createElement('a');
       link.href = url;
       link.download = `${title.replace(/\s+/g, '_')}_itinerary.pdf`;
@@ -105,31 +101,6 @@ const ItineraryPage: React.FC = () => {
             </Button>
           </CardContent>
         </Card>
-
-        {pdfUrl && (
-          <Card>
-            <CardHeader>
-              <CardTitle>PDF Preview</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="w-full h-[600px] rounded-lg overflow-hidden border border-gray-200">
-                <object
-                  data={pdfUrl}
-                  type="application/pdf"
-                  className="w-full h-full"
-                >
-                  <iframe 
-                    src={pdfUrl} 
-                    className="w-full h-full"
-                    title="PDF Preview"
-                  >
-                    <p>Your browser doesn't support PDF preview.</p>
-                  </iframe>
-                </object>
-              </div>
-            </CardContent>
-          </Card>
-        )}
       </div>
     </div>
   );

@@ -115,8 +115,8 @@ async def nebius_chat(data: dict):
           *formatted_messages,
           {
             "role": "user",
-            "content": f'''Here are some items found in images that are related to the user query, ENSURE TO LET THE USER KNOW ABOUT THE FOUND IMAGES it will be visible to them in the UI you just need to bring it up in conversation. ENSURE YOU RESPOND AS IF YOU ARE STILL TALKING TO THEM: 
-            {['image' + str(i) + "items found: " + pc_image_response[i]['items'] for i in range(len(pc_image_response))]},
+            "content": f'''Here are some items found in images that are related to the user query, ENSURE TO LET THE USER KNOW ABOUT THE FOUND IMAGES it will be visible to them in the UI you just need to bring it up  in conversation. ENSURE YOU RESPOND AS IF YOU ARE STILL TALKING TO THEM: 
+            {', '.join([f"image{str(i)} items found: {str(pc_image_response[i]['items'])}" for i in range(len(pc_image_response))])},
             user message: {prompt}'''
           }
         ],

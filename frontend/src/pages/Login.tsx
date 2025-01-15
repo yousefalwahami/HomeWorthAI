@@ -111,7 +111,7 @@ function Login(): JSX.Element {
           
         </CardContent>
         <CardFooter>
-          <Button className="w-full" onClick={handleClick}>Login</Button> 
+          <Button className="w-full bg-green-600 text-white hover:bg-green-700" onClick={handleClick}>Login</Button> 
         </CardFooter>
       </Card>
       {error && <AlertDestructive error={error}/>}
