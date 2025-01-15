@@ -26,20 +26,23 @@ async def nebius_chat(data: dict):
   searchChat = data.get('searchChat')
   searchImage = data.get('searchImage')
 
-  print(searchChat)
-  print(searchImage)
-
   if not prompt:
     raise HTTPException(status_code=400, detail="Prompt cannot be empty.")
   try:
     # Key item from user
     key_item = extract_key_item_from_prompt(prompt)
-    print(key_item)
 
     # Using key item, get info from vector db
     key_item_embedding = generate_query_embedding(key_item)
+    
+    pc_chat_response = None
+    pc_image_response = None
 
-    pc_response = search_in_pinecone(key_item_embedding, user_id, "message")
+    if(searchChat):
+      pc_chat_response = search_in_pinecone(key_item_embedding, user_id, "message")
+    elif(searchImage):
+      pc_image_response = search_in_pinecone(key_item_embedding, user_id, "message")
+   
     
     formatted_messages = [
           {"role": "user" if msg["sender"] == "user" else "assistant", "content": msg["text"]}
@@ -95,7 +98,7 @@ def extract_key_item_from_prompt(prompt: str):
       },
       {
         "role": "user",
-        "content": f"Extract a key item of what I'm looking for from my prompt :\n{prompt}\n\nFormat as:\n* Item: [item] Context: [context]."
+        "content": f"Extract a key item of what I'm looking for from my prompt:\n{prompt}\n\nFormat as:\n* Item: [item] Context: [context]. "
         # if you believe there is no query, return no query
         # if its a generic query, make up query "like I need to find some items"
       }
