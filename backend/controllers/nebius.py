@@ -5,6 +5,7 @@ from fastapi import APIRouter, File, Form, HTTPException, UploadFile
 from dotenv import load_dotenv
 import json
 from utils.pinecone import generate_query_embedding, search_in_pinecone
+from chatLogProcessing import chatlog_from_chatid
 
 load_dotenv()
 
@@ -40,8 +41,8 @@ async def nebius_chat(data: dict):
 
     if(searchImage):
       pc_image_response = search_in_pinecone(key_item_embedding, user_id, "image")
-   
-    
+  
+  
     formatted_messages = [
       {"role": "user" if msg["sender"] == "user" else "assistant", "content": msg["text"]}
       for msg in message_from_frontend 
