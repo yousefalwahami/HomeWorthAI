@@ -41,10 +41,7 @@ async def nebius_chat(data: dict):
 
     if(searchImage):
       pc_image_response = search_in_pinecone(key_item_embedding, user_id, "image", 3)
-    
 
-    print(pc_chat_response)
-    print(pc_image_response)
   
     formatted_messages = [
       {"role": "user" if msg["sender"] == "user" else "assistant", "content": msg["text"]}

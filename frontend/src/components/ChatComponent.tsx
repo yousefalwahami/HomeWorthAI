@@ -3,6 +3,7 @@ import axios from 'axios';
 import { Button } from "./ui/button";
 import { Input } from './ui/input';
 import { Checkbox } from './ui/checkbox';
+import Message from './Message';
 
 interface Message {
   sender: 'user' | 'bot';
@@ -72,21 +73,10 @@ const ChatComponent: React.FC<ChatComponentProps> = ({ user_id }) => {
 
   return (
     <div className="max-w-xl mx-auto p-6 bg-white shadow-lg rounded-lg">
-      <div className="space-y-4 mb-6 max-h-[500px] overflow-y-scroll hide-scrollbar">
+      <div className={`relative w-full h-fit max-h-[400px] flex flex-col overflow-y-scroll mb-4 hide-scrollbar`}>
         {messages.map((message, index) => (
-          <div
-            key={index}
-            className={`p-4 rounded-lg text-black flex items-center ${
-              message.sender === 'user' ? 'bg-teal-500 text-right flex-row-reverse' : 'bg-gray-300 text-left flex-row'
-            }`}
-          >
-            <img
-              src={message.sender === 'user' ? '/assets/user.png' : '/assets/sender.png'}
-              alt="Avatar"
-              className="w-8 h-8 rounded-full mr-2"
-            />
-            <p>{message.text}</p>
-          </div>
+
+          <Message key={index} text={message.text} person={message.sender} />
         ))}
       </div>
 
@@ -100,7 +90,7 @@ const ChatComponent: React.FC<ChatComponentProps> = ({ user_id }) => {
         />
 
         <div className="w-full flex flex-row justify-start gap-8">
-          <Button type="submit" className="py-3 bg-black text-white rounded-lg hover:bg-gray-800">
+          <Button type="submit" className="py-3 text-black rounded-lg hover:bg-gray-100 bg-green-200">
             Send
           </Button>
           <div className="flex items-center space-x-2">
