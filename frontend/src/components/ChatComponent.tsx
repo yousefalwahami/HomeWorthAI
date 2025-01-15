@@ -84,7 +84,7 @@ const ChatComponent: React.FC<ChatComponentProps> = ({ user_id }) => {
 
   return (
     <div className="max-w-[500px] mx-auto p-6 bg-white shadow-lg rounded-lg max-h-[550px] min-h-[550px] flex flex-col">
-      <div className="relative w-full h-fit max-h-[400px] flex flex-col overflow-y-auto hide-scrollbar">
+      <div className="relative w-full h-fit min-h-[400px] max-h-[400px] flex flex-col overflow-y-auto hide-scrollbar">
         {messages.map((message, index) => (
           <Message key={index} text={message.text} person={message.sender} />
         ))}

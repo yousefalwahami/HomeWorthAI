@@ -2,12 +2,10 @@ import { Button } from "./ui/button";
 import {
     NavigationMenu,
     NavigationMenuContent,
-    NavigationMenuIndicator,
     NavigationMenuItem,
     NavigationMenuLink,
     NavigationMenuList,
     NavigationMenuTrigger,
-    NavigationMenuViewport,
     navigationMenuTriggerStyle
   } from "./ui/navigation-menu";
 
@@ -46,7 +44,7 @@ export default function Navbar(): JSX.Element{
                     <NavigationMenu className="flex">
                         {shouldShowNavbar && <NavigationMenuList>
                             <NavigationMenuItem >
-                            <NavigationMenuTrigger className="bg-gray-100 text-lg">Options</NavigationMenuTrigger>
+                            <NavigationMenuTrigger className="bg-gray-100 text-lg w-full">Options</NavigationMenuTrigger>
                             <NavigationMenuContent>
                                 <Link to="/home" >
                                     <NavigationMenuLink className={navigationMenuTriggerStyle()}>Home</NavigationMenuLink>
@@ -56,6 +54,9 @@ export default function Navbar(): JSX.Element{
                                 </Link>
                                 <Link to="/chat" >
                                     <NavigationMenuLink className={navigationMenuTriggerStyle()}>Chat with bot</NavigationMenuLink>
+                                </Link>
+                                <Link to="/itinerary" >
+                                    <NavigationMenuLink className={navigationMenuTriggerStyle()}>Generate itinerary</NavigationMenuLink>
                                 </Link>
                             </NavigationMenuContent>
                             </NavigationMenuItem>

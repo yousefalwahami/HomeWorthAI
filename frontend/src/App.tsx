@@ -10,6 +10,7 @@ import Login from './pages/Login';
 import ChatPage from './pages/Chat';
 import SignUp from './pages/SignUp';
 import UploadChat from './pages/UploadChat'
+import ItineraryPage from './pages/Itinerary'
 import Navbar from './components/navbar';
 import { LoaderCircle } from 'lucide-react';
 import { SharedDataProvider } from './components/SharedDataProvider';
@@ -69,6 +70,7 @@ function App() {
               </SharedDataProvider>
                : <Navigate to='/login' />} />
             <Route path='/upload-chat' element={user ? <UploadChat/> : <Navigate to='/login' />} />
+            <Route path='/itinerary' element={user ? <ItineraryPage/> : <Navigate to='/login' />} />
           </Routes>
         </div>
     </Router>

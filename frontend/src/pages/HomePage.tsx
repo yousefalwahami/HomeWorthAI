@@ -13,10 +13,6 @@ function HomePage() {
     navigate('/upload-chat');
   }
 
-  const handleHomeNav = () => {
-    navigate('/home');
-  }
-
   return (
     <div className="text-black p-8">
       <h1 className="text-3xl font-semibold text-center bg-gradient-to-r from-green-500 via-green-600 to-green-700 text-transparent bg-clip-text mb-8">
@@ -51,14 +47,19 @@ function HomePage() {
 
         <Card className="hover:shadow-lg transition-shadow flex flex-col h-[300px] max-w-[300px]">
           <CardHeader>
-            <CardTitle>Dashboard</CardTitle>
-            <CardDescription>View your property insights</CardDescription>
+            <CardTitle>Generate Itinerary</CardTitle>
+            <CardDescription>Create a PDF summary</CardDescription>
           </CardHeader>
           <CardContent className="flex-grow">
-            <p>Access detailed analytics and property information</p>
+            <p>Generate a PDF document from your chat history and images</p>
           </CardContent>
           <CardFooter className="mt-auto">
-            <Button className="w-full py-3 text-black rounded-lg hover:bg-green-400 bg-green-600" onClick={handleHomeNav}>View Dashboard</Button>
+            <Button 
+              className="w-full py-3 text-black rounded-lg hover:bg-green-400 bg-green-600" 
+              onClick={() => navigate('/itinerary')}
+            >
+              Create Itinerary
+            </Button>
           </CardFooter>
         </Card>
       </div>
