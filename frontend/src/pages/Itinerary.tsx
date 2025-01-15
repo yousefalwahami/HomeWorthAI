@@ -5,17 +5,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import axios from '@/lib/axios';
 import { LoaderCircle } from 'lucide-react';
 
-interface Message {
-  sender: string;
-  text: string;
-  timestamp?: string;
-}
-
 const ItineraryPage: React.FC = () => {
-  const [messages, setMessages] = useState<Message[]>([]);
-  const [images, setImages] = useState<string[]>([]);
   const [title, setTitle] = useState('');
   const [loading, setLoading] = useState(false);
+  const user_id = Number(localStorage.getItem("user_id"));
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
 
   const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -30,29 +23,27 @@ const ItineraryPage: React.FC = () => {
 
     setLoading(true);
     try {
-      const response = await axios.post('/api/generate-itinerary', {
-        title,
-        messages,
-        images
-      }, {
-        responseType: 'blob'
+      // Make API GET request to /generate_report
+      const response = await axios.get('/api/generate_report', {
+        params: { user_id }, // Pass user_id as query parameter
+        responseType: 'blob' // Expecting a PDF file
       });
 
-      // Create a blob URL for preview and download
+      // Create a blob URL for the PDF
       const blob = new Blob([response.data], { type: 'application/pdf' });
       const url = window.URL.createObjectURL(blob);
       setPdfUrl(url);
 
-      // Create download link
+      // Optional: Automatically download the PDF after generation
       const link = document.createElement('a');
       link.href = url;
-      link.download = `${title.replace(/\s+/g, '_')}_itinerary.pdf`;
+      link.download = `${title.replace(/\s+/g, '_')}_report.pdf`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
     } catch (error) {
       console.error('Error generating PDF:', error);
-      // alert('Failed to generate PDF. Please try again.');
+      alert('Failed to generate PDF. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -82,26 +73,18 @@ const ItineraryPage: React.FC = () => {
               />
             </div>
 
-            {messages.length > 0 && (
-              <div className="space-y-2">
-                <h3 className="font-medium">Preview:</h3>
-                <div className="max-h-60 overflow-y-auto border rounded-md p-4">
-                  {messages.map((msg, index) => (
-                    <div key={index} className="mb-2">
-                      <span className="font-bold">{msg.sender}: </span>
-                      <span>{msg.text}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
             <Button
               onClick={handleGeneratePDF}
               disabled={loading || !title}
               className="w-full bg-green-600 text-white hover:bg-green-700"
             >
-              {loading ? <> <LoaderCircle className="animate-spin" /> Generating... </> : 'Generate PDF'}
+              {loading ? (
+                <>
+                  <LoaderCircle className="animate-spin" /> Generating...
+                </>
+              ) : (
+                'Generate PDF'
+              )}
             </Button>
           </CardContent>
         </Card>
@@ -109,24 +92,18 @@ const ItineraryPage: React.FC = () => {
         {pdfUrl && (
           <Card>
             <CardHeader>
-              <CardTitle>PDF Preview</CardTitle>
+              <CardTitle>Download Your PDF</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="w-full h-[600px] rounded-lg overflow-hidden border border-gray-200">
-                <object
-                  data={pdfUrl}
-                  type="application/pdf"
-                  className="w-full h-full"
-                >
-                  <iframe 
-                    src={pdfUrl} 
-                    className="w-full h-full"
-                    title="PDF Preview"
-                  >
-                    <p>Your browser doesn't support PDF preview.</p>
-                  </iframe>
-                </object>
-              </div>
+              <a
+                href={pdfUrl}
+                download={`${title.replace(/\s+/g, '_')}_report.pdf`}
+                className="block"
+              >
+                <Button className="w-full bg-green-600 text-white hover:bg-green-700">
+                  Download PDF
+                </Button>
+              </a>
             </CardContent>
           </Card>
         )}

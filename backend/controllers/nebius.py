@@ -1,9 +1,12 @@
 import os
 import traceback
+from fastapi.responses import FileResponse
 from openai import OpenAI
 from fastapi import APIRouter, File, Form, HTTPException, UploadFile
 from dotenv import load_dotenv
+from fpdf import FPDF
 import json
+from database.database import get_connection
 from utils.pinecone_db import generate_query_embedding, search_in_pinecone
 from .chatLogProcessing import chatlog_from_chatid
 
@@ -190,3 +193,140 @@ def extract_key_item_from_prompt(prompt: str):
   key_item = response['choices'][0]['message']['content'].split('*')
 
   return key_item[1] if len(key_item) > 1 else key_item[0]
+
+
+class PDF(FPDF):
+    def write_with_formatting(self, text):
+        """Custom method to handle basic Markdown-like formatting."""
+        lines = text.split("\n")
+        for line in lines:
+            # Handle headings (###)
+            if line.startswith("###"):
+                self.set_font("Arial", "B", 14)  # Bold, larger font for headings
+                self.cell(0, 10, line.strip("#").strip(), ln=True)
+                self.ln(2)  # Add space after heading
+
+            # Handle bold text (e.g., **bold**)
+            elif line.startswith("**") and line.endswith("**"):
+                self.set_font("Arial", "B", 12)
+                self.multi_cell(0, 10, line.strip("**"))
+                self.set_font("Arial", "", 12)
+
+            # Handle bullet points (e.g., * Item)
+            elif line.startswith("* "):
+                self.cell(10)  # Indent bullet points
+                self.multi_cell(0, 10, line.strip("* ").strip())
+
+            # Handle normal text
+            else:
+                self.multi_cell(0, 10, line)
+                self.ln(2)  # Add space between paragraphs
+
+
+@router.get("/generate_report")
+def generate_report(user_id: int):
+    # Validate user_id
+    if not user_id:
+        raise HTTPException(status_code=400, detail="User ID is required.")
+
+    conn = get_connection()
+    cursor = None
+
+    try:
+        # Fetch all items from images for the given user_id
+        query = """
+            SELECT items
+            FROM images
+            WHERE user_id = %s
+        """
+        cursor = conn.cursor()
+        cursor.execute(query, (user_id,))
+        rows = cursor.fetchall()
+
+        if not rows:
+            raise HTTPException(status_code=404, detail="No items found for this user.")
+
+        # Flatten and parse items
+        item_list = []
+        for row in rows:
+            if row['items']:  # Ensure items is not NULL
+                item_list.extend(row['items'].split(","))
+
+        # Remove duplicates and sort the list
+        unique_items = sorted(set(item.strip() for item in item_list if item.strip()))
+
+        # Generate text for the report using Llama3.3
+        report_text = generate_report_text(unique_items)
+
+        # Generate the PDF report
+        pdf_path = create_pdf_report(user_id, report_text)
+
+        return FileResponse(pdf_path, media_type='application/pdf', filename=f"user_{user_id}_report.pdf")
+
+    except Exception as e:
+        print(f"Error generating report for user_id {user_id}: {e}")
+        raise HTTPException(status_code=500, detail="An error occurred while generating the report.")
+
+    finally:
+        if cursor:
+            cursor.close()
+        if conn:
+            conn.close()
+
+
+def generate_report_text(items: list) -> str:
+    """Generate well-formatted report text using Llama3.3."""
+    prompt = f"""
+    Generate a detailed, well-structured, and user-friendly PDF report text listing the following items. 
+    Ensure the report is formatted with sections, bullet points, and a summary:
+    
+    Items: {', '.join(items)}
+    
+    Format it professionally and include a brief introduction and conclusion.
+    """
+    
+    try:
+        completion = client.chat.completions.create(
+            model="meta-llama/Llama-3.3-70B-Instruct",
+            messages=[
+                {
+                    "role": "system",
+                    "content": "You are a report generator tasked with creating well-structured and professional PDF report text."
+                },
+                {
+                    "role": "user",
+                    "content": f'''you need to make a report that will be placed in a pdf file. Have all formatting needed
+                    it will contain items found from images the user uploaded. This is to help file insurance claims and jog user memory
+                    PLEASE DO IT CORRECTLY HERE ARE THE ITEMS: {prompt}
+                    '''
+                }
+            ],
+            temperature=0.5,
+            max_tokens=1024,
+            top_p=0.9
+        )
+
+        response = json.loads(completion.to_json())
+        return response['choices'][0]['message']['content']
+
+    except Exception as e:
+        print(f"Error generating report text: {e}")
+        raise HTTPException(status_code=500, detail="Error generating report text.")
+
+
+def create_pdf_report(user_id: int, report_text: str) -> str:
+    """Generate a PDF report from the LLM-generated text."""
+    # Ensure the reports directory exists
+    os.makedirs("reports", exist_ok=True)
+
+    pdf = PDF()
+    pdf.add_page()
+    pdf.set_font("Arial", size=12)
+
+    # Use the custom formatting method to handle the report text
+    pdf.write_with_formatting(report_text)
+
+    pdf_path = f"reports/user_{user_id}_report.pdf"
+    pdf.output(pdf_path)
+    return pdf_path
+
