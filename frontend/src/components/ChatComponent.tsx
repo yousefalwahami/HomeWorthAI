@@ -1,11 +1,10 @@
-import React, { useState, ChangeEvent, FormEvent, useEffect } from 'react';
+import React, { useState, ChangeEvent, FormEvent } from 'react';
 import axios from 'axios';
 import { Button } from "./ui/button";
 import { Input } from './ui/input';
 import { Checkbox } from './ui/checkbox';
 import Message from './Message';
 import { useSharedData } from '@/components/SharedDataProvider';
-import { ChevronDown, ChevronLeft } from 'lucide-react';
 
 interface Message {
   sender: 'user' | 'bot';
@@ -21,7 +20,6 @@ const ChatComponent: React.FC<ChatComponentProps> = ({ user_id }) => {
   const [inputText, setInputText] = useState<string>('');
   const [searchChat, setSearchChat] = useState(false);
   const [searchImage, setSearchImages] = useState(false);
-  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const { setChatResponses, setImageResponses } = useSharedData();
 
@@ -84,13 +82,8 @@ const ChatComponent: React.FC<ChatComponentProps> = ({ user_id }) => {
     }
   };
 
-  const handleClick = async () =>{
-    if(isModalOpen==false){ setIsModalOpen(true);} else setIsModalOpen(false);
-  }
-
   return (
     <div className="max-w-[500px] mx-auto p-6 bg-white shadow-lg rounded-lg max-h-[550px] min-h-[550px] flex flex-col">
-      <Button onClick={handleClick}>{isModalOpen ? <ChevronLeft /> : <ChevronDown /> }</Button>
       <div className="relative w-full h-fit max-h-[400px] flex flex-col overflow-y-auto hide-scrollbar">
         {messages.map((message, index) => (
           <Message key={index} text={message.text} person={message.sender} />

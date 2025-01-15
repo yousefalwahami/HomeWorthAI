@@ -22,9 +22,11 @@ interface SharedDataContextProps {
   relatedContent: string | null;
   chatResponses: ChatResponse[];
   imageResponses: ImageResponse[];
+  isContentModalOpen: boolean;
   setRelatedContent: (content: string) => void;
   setChatResponses: (responses: ChatResponse[]) => void;
   setImageResponses: (responses: ImageResponse[]) => void;
+  setIsContentModalOpen: (isOpen: boolean) => void;
 }
 
 const SharedDataContext = createContext<SharedDataContextProps | undefined>(undefined);
@@ -34,6 +36,8 @@ export const SharedDataProvider: React.FC<{ children: ReactNode }> = ({ children
   const [chatResponses, setChatResponses] = useState<ChatResponse[]>([]);
   const [imageResponses, setImageResponses] = useState<ImageResponse[]>([]);
 
+  const [isContentModalOpen, setIsContentModalOpen] = useState(false);
+
 
   return (
     <SharedDataContext.Provider
@@ -41,9 +45,11 @@ export const SharedDataProvider: React.FC<{ children: ReactNode }> = ({ children
         relatedContent,
         chatResponses,
         imageResponses,
+        isContentModalOpen,
         setRelatedContent,
         setChatResponses,
         setImageResponses,
+        setIsContentModalOpen
       }}
     >
       {children}
