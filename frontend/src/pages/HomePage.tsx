@@ -29,7 +29,7 @@ function HomePage() {
             <CardDescription>Start a conversation with our AI assistant</CardDescription>
           </CardHeader>
           <CardContent className="flex-grow">
-            <p>Ask questions and get intelligent responses about your property</p>
+            <p>Ask questions and get intelligent responses about your chatlogs</p>
           </CardContent>
           <CardFooter className="mt-auto">
             <Button className="w-full py-3 text-black rounded-lg hover:bg-green-400 bg-green-600" onClick={handleChatNav}>Start Chat</Button>

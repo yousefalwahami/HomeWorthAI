@@ -11,6 +11,7 @@ import ChatPage from './pages/Chat';
 import SignUp from './pages/SignUp';
 import UploadChat from './pages/UploadChat'
 import Navbar from './components/navbar';
+import { LoaderCircle } from 'lucide-react';
 
 type userType = {
   email: string,
@@ -41,7 +42,10 @@ function App() {
 
 
   if (!isUserChecked) {
-    return <div className="flex justify-center items-center h-screen">Loading...</div>;
+    return <div className="flex justify-center items-center h-screen">
+      <LoaderCircle className="animate-spin pr-2" />
+      Loading...
+    </div>;
   }
 
   /*

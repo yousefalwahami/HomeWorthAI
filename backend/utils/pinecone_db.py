@@ -184,6 +184,7 @@ def store_embeddings_in_pinecone(dict_item_context, embeddings, chat_id, file, u
                     "image_id": image_id,
                     "user_id": user_id,
                     "items": dict_item_context["items"],
+                    "filename": dict_item_context["filename"],
                 }
             }
         ]

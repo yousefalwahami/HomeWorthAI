@@ -11,6 +11,7 @@ interface ChatResponse {
 }
 
 interface ImageResponse {
+  filename: string;
   image_id: number;
   items: string;
   type: string;

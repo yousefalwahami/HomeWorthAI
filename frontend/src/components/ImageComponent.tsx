@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { LoaderCircle } from 'lucide-react';
 
 interface ImageComponentProps {
   imageId: number;
@@ -34,8 +35,7 @@ const ImageComponent: React.FC<ImageComponentProps> = ({ imageId }) => {
     </div>
   ) : (
     <div>
-    a{imageUrl}a
-    <p>Loading image...</p>
+      <LoaderCircle className="animate-spin" />
     </div>
     
   );

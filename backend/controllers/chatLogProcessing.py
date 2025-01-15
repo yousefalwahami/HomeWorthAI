@@ -165,8 +165,8 @@ def parse_message(message):
 
     return None
 
-@router.get("/chatlog_from_chatid")
-def chatlog_from_chatid(chatid):
+@router.get("/chatlog_from_chatid/{chatid}")
+def chatlog_from_chatid(chatid: int):
     conn = get_connection()
     cursor = None
 
@@ -188,7 +188,10 @@ def chatlog_from_chatid(chatid):
         cursor.close()
         conn.close()
 
-        return result
+        if not result:
+            return {"chatlog": []}  # Return an empty array if no chatlog found
+
+        return {"chatlog": result}  # Return the chatlog in the proper format
 
     except Exception as e:
         print(f"Error fetching all chats of chatid: {chatid}: ", e)
