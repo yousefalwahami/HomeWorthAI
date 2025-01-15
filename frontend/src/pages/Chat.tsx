@@ -17,13 +17,13 @@ const ChatPage: React.FC = () => {
             : '-translate-x-full opacity-0 absolute -left-[450px]'
         }`}
       >
-        <h1 className="text-3xl font-semibold text-center bg-gradient-to-r from-green-500 via-green-600 to-green-700 text-transparent bg-clip-text mb-8">
+        <h1 className="text-3xl min-h-[75px] font-semibold text-center bg-gradient-to-r from-green-500 via-green-600 to-green-700 text-transparent bg-clip-text mb-2">
           Related Content
         </h1>
         <RelatedContentComponent />
       </div>
       <div className={`w-full max-w-xl transition-all duration-300 ease-in-out`}>
-        <h1 className="text-3xl font-semibold text-center bg-gradient-to-r from-green-500 via-green-600 to-green-700 text-transparent bg-clip-text mb-8">
+        <h1 className="text-3xl min-h-[75px] font-semibold text-center bg-gradient-to-r from-green-500 via-green-600 to-green-700 text-transparent bg-clip-text mb-2">
           Talk about what you last remember..
         </h1>
         <ChatComponent user_id={user_id} />
