@@ -5,7 +5,7 @@ from fastapi import APIRouter, File, Form, HTTPException, UploadFile
 from dotenv import load_dotenv
 import json
 from backend.utils.pinecone_db import generate_query_embedding, search_in_pinecone
-from utils.pinecone import generate_query_embedding, search_in_pinecone
+from utils.pinecone_db import generate_query_embedding, search_in_pinecone
 from chatLogProcessing import chatlog_from_chatid
 
 load_dotenv()
