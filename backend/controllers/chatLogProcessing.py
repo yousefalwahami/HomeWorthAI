@@ -165,6 +165,7 @@ def parse_message(message):
 
     return None
 
+@router.get("/chatlog_from_chatid")
 def chatlog_from_chatid(chatid):
     conn = get_connection()
     cursor = None
