@@ -10,7 +10,7 @@ from detectron2 import model_zoo
 from PIL import Image, ImageDraw
 from detectron2.data import MetadataCatalog
 from transformers import CLIPProcessor, CLIPModel
-from backend.utils.pinecone_db import query_index, store_embeddings_in_pinecone
+from utils.pinecone_db import query_index, store_embeddings_in_pinecone
 from database.database import get_connection
 from datetime import datetime
 
