@@ -5,6 +5,7 @@ from controllers.chatLogProcessing import router as chatlog_upload_router
 from controllers.nebius import router as nebius_router
 from controllers.upload_backup import router as upload_backup_router
 from controllers.authentication import router as authentication_router
+from controllers.generateItinerary import router as report_generation_router
 from database.database import get_connection
 from utils.pinecone_db import clear_index
 
@@ -36,6 +37,7 @@ app.include_router(chatlog_upload_router, prefix="/api", tags=["chatlog_upload"]
 app.include_router(nebius_router, prefix="/api", tags=["nebius"])
 app.include_router(upload_backup_router, prefix="/api", tags=["files"])
 app.include_router(authentication_router, prefix="/api", tags=["authentication"])
+app.include_router(report_generation_router, prefix="/api", tags=["report_generation"])
 
 
 conn = get_connection()
