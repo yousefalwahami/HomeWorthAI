@@ -94,9 +94,8 @@ async def detect_objects(file: UploadFile = File(...), user_id: int = None):
 
   # Process results (e.g., extracting detected objects)
   instances = outputs["instances"]
-  boxes = instances.pred_boxes.tensor.numpy()  # Bounding boxes of detected objects
-  scores = instances.scores.numpy()  # Confidence scores of detections
   classes = instances.pred_classes.numpy()  # Class labels of detected objects
+  print(classes)
 
   # Extract object labels
   detected_labels = [COCO_CLASSES[cls] for cls in classes if cls < len(COCO_CLASSES)]
@@ -150,16 +149,9 @@ async def detect_objects(file: UploadFile = File(...), user_id: int = None):
     items=items,
     image_data=image_bytes  
   )
-
-  print(image_id)
-  print(user_id)
-  print(items)
   dict_item_context = {"items": unique_classes}
   embedding_result = store_embeddings_in_pinecone(dict_item_context=dict_item_context, embeddings=image_embeddings, chat_id=0, file=file.filename, user_id=user_id, image_id=image_id, type="image")
-  #print(query_index(image_embeddings))
   
-
-  # return {"detections": results}
   return {"detections": embedding_result}
 
 

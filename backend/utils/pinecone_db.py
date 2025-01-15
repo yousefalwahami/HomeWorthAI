@@ -155,6 +155,8 @@ def store_embeddings_in_pinecone(dict_item_context, embeddings, chat_id, file, u
         embeddings (list): List of embeddings corresponding to each item-context pair.
         filename (str): Name of the uploaded file (used as a unique identifier).
     """
+
+    print(dict_item_context)
     if (type=="message"):
         pinecone_data = [
             {
@@ -176,15 +178,14 @@ def store_embeddings_in_pinecone(dict_item_context, embeddings, chat_id, file, u
         pinecone_data = [
             {
                 "id": file + '_' + str(image_id),
-                "values": embedding.tolist(),  # Convert NumPy array to list
+                "values": embeddings[0].tolist(),  # Convert NumPy array to list
                 "metadata": {
                     "type": type,
                     "image_id": image_id,
                     "user_id": user_id,
-                    "items": dict_item_context["items"][i],
+                    "items": dict_item_context["items"],
                 }
             }
-            for i, embedding in enumerate(embeddings)
         ]
 
     # Upsert data into Pinecone

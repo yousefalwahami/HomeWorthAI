@@ -37,39 +37,116 @@ async def nebius_chat(data: dict):
     pc_chat_response = None
     pc_image_response = None
     if(searchChat):
-      pc_chat_response = search_in_pinecone(key_item_embedding, user_id, "message", 2)
+      pc_chat_response = search_in_pinecone(key_item_embedding, user_id, "message", 3)
 
     if(searchImage):
-      pc_image_response = search_in_pinecone(key_item_embedding, user_id, "image", 3)
-
+      pc_image_response = search_in_pinecone(key_item_embedding, user_id, "image", 2)
+    
+    print(pc_image_response)
+    print(pc_chat_response)
   
     formatted_messages = [
       {"role": "user" if msg["sender"] == "user" else "assistant", "content": msg["text"]}
       for msg in message_from_frontend 
     ]
     
-    formatted_messages = formatted_messages[-4:] if len(formatted_messages) > 4 else formatted_messages
-    
-    completion = client.chat.completions.create(
-      model="meta-llama/Llama-3.3-70B-Instruct",
-      messages = [{
-          "role": "system",
-          "content": '''Your goal is to act as an AI chat bot to help people who have lost there home remember items lost in there home. 
-          We may or may not provide you with information. If the user is vague try to help them jog there memory. 
-          If you receive items such as chat logs or images let the user know. ENSURE TO ACT AS IF YOU ARE TALKING TO SOMEONE SO HAVE SOME BREVITY AT TIMES.'''
+    formatted_messages = formatted_messages[-5:] if len(formatted_messages) > 5 else formatted_messages
 
-          # make sure to make it talk like an ai aswell -> if i say hello it should talk to me normally like an assistant
-        },
-        *formatted_messages,
-        {
-          "role": "user",
-          "content": f"METADATA: none, user message: {prompt}"
-        }
-      ],
-      temperature=0.6,
-      max_tokens=512,
-      top_p=0.9
-    )
+    completion = None
+
+    if(pc_chat_response and pc_image_response):
+      completion = client.chat.completions.create(
+        model="meta-llama/Llama-3.3-70B-Instruct",
+        messages = [{
+            "role": "system",
+            "content": '''Your goal is to act as an AI chat bot to help people who have lost there home remember items lost in there home. 
+            We may or may not provide you with information. If the user is vague try to help them jog there memory. 
+            If you receive items such as chat logs or images let the user know. ENSURE TO ACT AS IF YOU ARE TALKING TO SOMEONE SO HAVE SOME BREVITY AT TIMES.'''
+
+            # make sure to make it talk like an ai aswell -> if i say hello it should talk to me normally like an assistant
+          },
+          *formatted_messages,
+          {
+            "role": "user",
+            "content": f'''Here are some related messages and detected items in the images related to the user message ensure to let the user know about this: 
+            {['image' + str(i) + "items: " + pc_image_response[i]['items'] for i in range(len(pc_image_response))]} 
+            messages: {["Found " + pc_chat_response[i]['item'] + "in " + pc_chat_response[i]['message'] for i in range(len(pc_chat_response))]}, 
+            user message: {prompt}'''
+          }
+        ],
+        temperature=0.6,
+        max_tokens=512,
+        top_p=0.9
+      )
+    elif pc_chat_response:
+      completion = client.chat.completions.create(
+        model="meta-llama/Llama-3.3-70B-Instruct",
+        messages = [{
+            "role": "system",
+            "content": '''Your goal is to act as an AI chat bot to help people who have lost there home remember items lost in there home. 
+            We may or may not provide you with information. If the user is vague try to help them jog there memory. 
+            If you receive items such as chat logs or images let the user know. ENSURE TO ACT AS IF YOU ARE TALKING TO SOMEONE SO HAVE SOME BREVITY AT TIMES.'''
+
+            # make sure to make it talk like an ai aswell -> if i say hello it should talk to me normally like an assistant
+          },
+          *formatted_messages,
+          {
+            "role": "user",
+            "content": f'''Here are some related messages to the user query, ENSURE TO LET THE USER KNOW ABOUT THE FOUND MESSAGE it will be visible to them in the UI just need to bring it up in conversation. ENSURE YOU RESPOND AS IF YOU ARE STILL TALKING: 
+            messages: {["Found " + pc_chat_response[i]['item'] + "in " + pc_chat_response[i]['message'] for i in range(len(pc_chat_response))]}, 
+            user message: {prompt}'''
+          }
+        ],
+        temperature=0.6,
+        max_tokens=512,
+        top_p=0.9
+      )
+    elif pc_image_response:
+      completion = client.chat.completions.create(
+        model="meta-llama/Llama-3.3-70B-Instruct",
+        messages = [{
+            "role": "system",
+            "content": '''Your goal is to act as an AI chat bot to help people who have lost there home remember items lost in there home. 
+            We may or may not provide you with information. If the user is vague try to help them jog there memory. 
+            If you receive items such as chat logs or images let the user know. ENSURE TO ACT AS IF YOU ARE TALKING TO SOMEONE SO HAVE SOME BREVITY AT TIMES.'''
+
+            # make sure to make it talk like an ai aswell -> if i say hello it should talk to me normally like an assistant
+          },
+          *formatted_messages,
+          {
+            "role": "user",
+            "content": f'''Here are some items found in images that are related to the user query, ENSURE TO LET THE USER KNOW ABOUT THE FOUND IMAGES it will be visible to them in the UI you just need to bring it up in conversation. ENSURE YOU RESPOND AS IF YOU ARE STILL TALKING TO THEM: 
+            {['image' + str(i) + "items found: " + pc_image_response[i]['items'] for i in range(len(pc_image_response))]},
+            user message: {prompt}'''
+          }
+        ],
+        temperature=0.6,
+        max_tokens=512,
+        top_p=0.9
+      )
+    else:
+      completion = client.chat.completions.create(
+        model="meta-llama/Llama-3.3-70B-Instruct",
+        messages = [{
+            "role": "system",
+            "content": '''Your goal is to act as an AI chat bot to help people who have lost there home remember items lost in there home. 
+            We may or may not provide you with information. If the user is vague try to help them jog there memory. 
+            If you receive items such as chat logs or images let the user know. ENSURE TO ACT AS IF YOU ARE TALKING TO SOMEONE SO HAVE SOME BREVITY AT TIMES.'''
+
+            # make sure to make it talk like an ai aswell -> if i say hello it should talk to me normally like an assistant
+          },
+          *formatted_messages,
+          {
+            "role": "user",
+            "content": f'''
+            No messages or images searched JUST RESPOND TO USER PROMPT,
+            user message: {prompt}'''
+          }
+        ],
+        temperature=0.6,
+        max_tokens=512,
+        top_p=0.9
+      )
 
     # Return the completion response
     response = json.loads(completion.to_json())
