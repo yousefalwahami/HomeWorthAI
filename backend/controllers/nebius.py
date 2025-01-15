@@ -40,14 +40,10 @@ async def nebius_chat(data: dict):
     pc_image_response = None
 
     if(searchChat):
-      pc_chat_response = search_in_pinecone(key_item_embedding, user_id=1, type="message")
+      pc_chat_response = search_in_pinecone(key_item_embedding, user_id, "message")
 
     if(searchImage):
       pc_image_response = search_in_pinecone(key_item_embedding, user_id, "image")
-
-    
-    print(pc_chat_response)
-    print(pc_image_response)
    
     
     formatted_messages = [

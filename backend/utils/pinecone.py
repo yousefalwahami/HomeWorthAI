@@ -204,10 +204,10 @@ def search_in_pinecone(query_embedding, user_id, type):
     query_vector = query_embedding.cpu().numpy().tolist()
     result = index.query(
         vector=query_vector, 
-        top_k=5, 
+        top_k=100, 
         include_metadata=True,  # You can retrieve metadata too
         metric="cosine",
-        filter={"user_id": user_id, "type": type}
+        filter={}
     )
     
     # Step 2: Parse and return results
