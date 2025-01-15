@@ -174,18 +174,18 @@ async def get_image(image_id: int):
         # Query to get image data
         cursor.execute("SELECT image_data FROM images WHERE image_id = %s", (image_id,))
         image_data = cursor.fetchone()
-        print("Raw image_data fetched from DB:", image_data)
+        print("Raw image_data fetched from DB:", image_data['image_data'])
 
         # Check if image was found
-        if not image_data or not image_data[0]:
+        if not image_data['image_data']:
             raise HTTPException(status_code=404, detail="Image not found or image data is empty.")
 
         # Convert memoryview to bytes
-        image_bytes = bytes(image_data[0])
-        print("Length of image bytes:", len(image_bytes))
+        image_bytes = bytes(image_data['image_data'])
+        print("Length of image bytes:", len(image_data['image_data']))
 
         # Convert the image bytes to a file-like object and open the image using PIL
-        image = Image.open(BytesIO(image_bytes))
+        image = Image.open(BytesIO(image_data['image_data']))
 
         # Save the image to a BytesIO object
         img_byte_arr = BytesIO()
