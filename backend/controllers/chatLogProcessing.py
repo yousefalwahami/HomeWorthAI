@@ -7,59 +7,60 @@ import re
 
 router = APIRouter()
 
-#file: UploadFile means that the file type will be of type upload file
-#File(...) lets Fast API know it will be coming from the requests multipart/form-data body.
 @router.post("/process_chatlog")
-#async def process_chatlog(file: UploadFile = File(...), user_id: int = None):4
 async def process_chatlog(file: UploadFile = File(...), user_id: int = Body(...)):
+    # Validate user_id
     if not user_id:
-        raise HTTPException(status_code=400, detail="User ID is required") 
+        raise HTTPException(status_code=400, detail="User ID is required.")
     
-    '''
-    # Step 1: Save chat log locally
-    file_path = f"chatlogs/{file.filename}"
-    os.makedirs("chatlogs", exist_ok=True)
-    with open(file_path, "wb") as f:
-        f.write(await file.read())
+    # Validate file type
+    if not file.content_type.startswith("text/"):
+        raise HTTPException(status_code=400, detail="Invalid file type. Please upload a valid text file.")
     
-    # Step 2: Read chat log content
-    with open(file_path, "r", encoding='utf-8') as fi:
-        chatlog_content = fi.read()
-    '''
+    try:
+        # Read and decode the uploaded file
+        chatlog_content = await file.read()
+        try:
+            chatlog_content = chatlog_content.decode('utf-8')
+        except UnicodeDecodeError:
+            raise HTTPException(status_code=400, detail="Failed to decode the file. Ensure it is UTF-8 encoded.")
+        
+        # Extract insights using the Llama model
+        dict_item_context = extract_insights_from_chatlog(chatlog_content)
 
-    chatlog_content = await file.read()
-    chatlog_content = chatlog_content.decode('utf-8')
+        # Check if insights were extracted successfully
+        if not dict_item_context.get("items"):
+            raise HTTPException(status_code=400, detail="No insights extracted from the chat log.")
 
-    # Step 3: Extract insights using Llama
-    dict_item_context = extract_insights_from_chatlog(chatlog_content)
+        # Generate embeddings
+        embeddings = generate_embeddings(dict_item_context)
 
-    if not dict_item_context.get("items"):
-        raise HTTPException(status_code=400, detail="No insights extracted from the chat log.")
-    
-    
-    # Step 4: Generate embeddings
-    embeddings = generate_embeddings(dict_item_context)
+        # Save chat log to the database
+        chat_id = save_chatlog_to_db(user_id=user_id, chat_title=file.filename)
+        if not chat_id:
+            raise HTTPException(status_code=500, detail="Error saving chat log to the database.")
 
-    #Step 6: save data to db
-    chat_id = save_chatlog_to_db(
-        user_id=user_id, 
-        chat_title=file.filename
-    )
+        # Save messages and store embeddings if present
+        if dict_item_context.get("messages", []) and chat_id:
+            dict_item_context = save_message_to_db(dict_item_context, chat_id=chat_id)
+            store_embeddings_in_pinecone(
+                dict_item_context, embeddings, chat_id=chat_id,
+                file=file.filename, user_id=user_id, image_id=0, type="message"
+            )
 
-    if not chat_id:
-        raise HTTPException(status_code=500, detail="Error saving chat log to the database.")
+        # Return a success response
+        return {
+            "message": "Chat log processed successfully",
+            "items": dict_item_context["items"],
+            "context": dict_item_context["context"],
+            "messages": dict_item_context["messages"],
+        }
 
-    if dict_item_context.get("messages", []) and chat_id:
-        dict_item_context = save_message_to_db(dict_item_context, chat_id=chat_id)
-        store_embeddings_in_pinecone(dict_item_context, embeddings, chat_id=chat_id, file=file.filename, user_id=user_id, image_id=0, type="message")
+    except Exception as e:
+        # Catch and log unexpected errors
+        print(f"Error processing chat log: {e}")
+        raise HTTPException(status_code=500, detail="An error occurred while processing the chat log.")
 
-
-    return {
-        "message": "Chat log processed successfully",
-        "items": dict_item_context["items"],
-        "context": dict_item_context["context"],
-        "messages": dict_item_context["messages"],
-    }
 
 
 def save_chatlog_to_db(user_id, chat_title):

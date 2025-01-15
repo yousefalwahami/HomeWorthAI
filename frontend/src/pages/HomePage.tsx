@@ -38,11 +38,11 @@ function HomePage() {
 
         <Card className="hover:shadow-lg transition-shadow flex flex-col h-[300px] max-w-[300px]">
           <CardHeader>
-            <CardTitle>Upload Chatlog</CardTitle>
+            <CardTitle>Upload Chatlog/Images</CardTitle>
             <CardDescription>Share your conversation history</CardDescription>
           </CardHeader>
           <CardContent className="flex-grow">
-            <p>Upload and analyze your previous chat conversations</p>
+            <p>Upload and analyze your previous chat conversations and images</p>
           </CardContent>
           <CardFooter className="mt-auto">
             <Button className="w-full py-3 text-black rounded-lg hover:bg-green-400 bg-green-600" onClick={handleChatlogNav}>Upload Now</Button>

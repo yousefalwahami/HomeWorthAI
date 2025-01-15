@@ -1,5 +1,5 @@
 import os
-from fastapi import APIRouter, File, HTTPException, UploadFile
+from fastapi import APIRouter, File, Form, HTTPException, UploadFile
 from fastapi.responses import StreamingResponse
 from io import BytesIO
 import torch
@@ -68,11 +68,16 @@ def save_image_to_db(user_id, filename, items, image_data):
 
 
 @router.post("/detect_objects")
-async def detect_objects(file: UploadFile = File(...), user_id: int = None):
+async def detect_objects(
+    file: UploadFile = File(...),
+    user_id: int = Form(None) 
+):
   # Read the image file
   image_bytes = await file.read()
   image = Image.open(BytesIO(image_bytes))
   image_inputs = clip_processor(images=image, return_tensors="pt")
+  print(user_id)
+  
 
     # Get the image embedding from CLIP (returns a tensor with shape [batch_size, 512])
   with torch.no_grad():
@@ -82,7 +87,6 @@ async def detect_objects(file: UploadFile = File(...), user_id: int = None):
   image_embeddings = image_embeddings.cpu().numpy()
 
   # The image embedding is now a 512-dimensional vector
-  print(image_embeddings.shape)  # Should output (1, 512)
 
 
   # Convert to a format Detectron2 can use (numpy array)
@@ -95,7 +99,6 @@ async def detect_objects(file: UploadFile = File(...), user_id: int = None):
   # Process results (e.g., extracting detected objects)
   instances = outputs["instances"]
   classes = instances.pred_classes.numpy()  # Class labels of detected objects
-  print(classes)
 
   # Extract object labels
   detected_labels = [COCO_CLASSES[cls] for cls in classes if cls < len(COCO_CLASSES)]
@@ -141,7 +144,6 @@ async def detect_objects(file: UploadFile = File(...), user_id: int = None):
   print(results)
   print("Unique Classes (Items):", items)
   '''
-  
 
   image_id = save_image_to_db(
     user_id=user_id, 
@@ -149,6 +151,7 @@ async def detect_objects(file: UploadFile = File(...), user_id: int = None):
     items=items,
     image_data=image_bytes  
   )
+  
   dict_item_context = {"items": unique_classes}
   embedding_result = store_embeddings_in_pinecone(dict_item_context=dict_item_context, embeddings=image_embeddings, chat_id=0, file=file.filename, user_id=user_id, image_id=image_id, type="image")
   

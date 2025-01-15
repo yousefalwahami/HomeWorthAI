@@ -1,15 +1,16 @@
 import React, { useState, useRef } from 'react';
-import api from '@/lib/axios'; // Import your Axios instance if you need to upload to the backend
-import { Button } from "@/components/ui/button"; // Replace with your actual button component
-import { Input } from "@/components/ui/input"; // Replace with your input component
-
+import api from '@/lib/axios';
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Checkbox } from "@/components/ui/checkbox";
 
 const UploadChatPage: React.FC = () => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [uploadMessage, setUploadMessage] = useState<string | null>(null);
-  const [serverResponse, setServerResponse] = useState<string | null>(null); // State for server response
+  const [serverResponse, setServerResponse] = useState<any>(null);
   const user_id = Number(localStorage.getItem("user_id"));
-  const [isDragging, setIsDragging] = useState(false); // Track drag-and-drop state
+  const [isDragging, setIsDragging] = useState(false);
+  const [isChatOrImage, setIsChatOrImage] = useState(false); // false = chat, true = image
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const triggerFileInput = () => {
@@ -48,27 +49,37 @@ const UploadChatPage: React.FC = () => {
     const formData = new FormData();
     formData.append("file", selectedFile);
     formData.append("user_id", user_id.toString());
-    console.log('help: ', formData);
-
+    formData.append("type", isChatOrImage ? "image" : "chat");
 
     try {
-      const response = await api.post('/api/process_chatlog', formData, {
+      const endpoint = isChatOrImage
+        ? '/api/detect_objects'
+        : '/api/process_chatlog';
+
+      const response = await api.post(endpoint, formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
 
       setUploadMessage("File uploaded successfully!");
-      setServerResponse(JSON.stringify(response.data, null, 2));
-    } catch (error) {
+      setServerResponse(response.data);
+      console.log(response.data);
+    } catch (error: any) {
       console.error("Error uploading file:", error);
-      setUploadMessage("Failed to upload file. Please try again.");
+      const errorMessage = error.response?.data?.detail || "Failed to upload file. Please try again.";
+      setUploadMessage(errorMessage);
     }
+  };
+
+  const handleToggleUploadType = () => {
+    setIsChatOrImage((prev) => !prev);
+    setServerResponse(null); // Clear response data when switching modes
   };
 
   return (
     <div className="min-h-screen bg-gray-100 flex items-center justify-center">
       <div className="w-full max-w-3xl p-4">
         <h1 className="text-3xl font-semibold text-center text-teal-600 mb-8">
-          Upload chat fam
+          {isChatOrImage ? "Upload Image" : "Upload Chat"}
         </h1>
 
         <div
@@ -79,22 +90,15 @@ const UploadChatPage: React.FC = () => {
           onDragLeave={handleDragLeave}
           onDrop={handleDrop}
         >
-          <p className="text-gray-600 mb-2">
-            Drag & drop your file here or click to select.
-          </p>
+          <p className="text-gray-600 mb-2">Drag & drop your file here or click to select.</p>
           <Input
             type="file"
-            accept=".txt,.json" // Adjust accepted file types as needed
+            accept={isChatOrImage ? ".jpg,.jpeg,.png" : ".txt,.json"}
             onChange={handleFileChange}
-            className="hidden" // Hide the default input
+            className="hidden"
+            ref={fileInputRef}
           />
-          <Button
-            variant="outline"
-            onClick={() => {
-              const fileInput = document.querySelector("input[type='file']") as HTMLInputElement;
-              fileInput?.click();
-            }}
-          >
+          <Button variant="outline" onClick={triggerFileInput}>
             Browse File
           </Button>
         </div>
@@ -105,21 +109,79 @@ const UploadChatPage: React.FC = () => {
           </p>
         )}
 
-        <Button
-          onClick={handleUpload}
-          className="mt-4 bg-teal-600 text-white px-4 py-2 rounded hover:bg-teal-700 transition"
-        >
-          Upload File
-        </Button>
+        <div className="flex items-center mt-4">
+          <Button
+            onClick={handleUpload}
+            className="bg-teal-600 text-white px-4 py-2 rounded hover:bg-teal-700 transition"
+          >
+            Upload File
+          </Button>
+          <div className="flex items-center ml-4">
+            <Checkbox
+              id="toggleUpload"
+              onClick={handleToggleUploadType}
+            />
+            <label htmlFor="toggleUpload" className="ml-2 text-gray-700">
+              {isChatOrImage ? "Switch to Chat" : "Switch to Image"}
+            </label>
+          </div>
+        </div>
 
         {uploadMessage && (
-          <p className="mt-4 text-center text-sm text-gray-700">{uploadMessage}</p>
+          <p className={`mt-4 text-center text-sm ${uploadMessage.includes("successfully") ? "text-green-600" : "text-red-600"}`}>
+            {uploadMessage}
+          </p>
         )}
 
         {serverResponse && (
-          <pre className="mt-4 bg-gray-200 p-4 rounded text-sm">
-            {serverResponse}
-          </pre>
+          <div className="mt-6 bg-gray-50 p-6 rounded shadow">
+            <h2 className="text-2xl font-bold mb-6 text-teal-600">Response:</h2>
+
+            {isChatOrImage ? (
+              <>
+                <div className="mt-4 bg-white p-4 rounded shadow">
+                  <h3 className="text-xl font-bold mb-2">Detected Items in Image:</h3>
+                  {serverResponse?.detections?.[0]?.metadata?.items?.map((item: string, index: number) => (
+                    <div key={index} className="p-2 border rounded mb-2">
+                      {item}
+                    </div>
+                  )) || <div>No items detected.</div>}
+                </div>
+                <div className="mt-4 bg-white p-4 rounded shadow">
+                  <h3 className="text-xl font-bold mb-2">Image Metadata:</h3>
+                  <p><strong>Filename:</strong> {serverResponse?.detections?.[0]?.metadata?.filename || "N/A"}</p>
+                  <p><strong>Image ID:</strong> {serverResponse?.detections?.[0]?.metadata?.image_id || "N/A"}</p>
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="mt-4 bg-white p-4 rounded shadow">
+                  <h3 className="text-xl font-bold mb-2">Items Found:</h3>
+                  {serverResponse?.items?.map((item: string, index: number) => (
+                    <div key={index} className="p-2 border rounded mb-2">
+                      {item}
+                    </div>
+                  )) || <div>No items found.</div>}
+                </div>
+                <div className="mt-4 bg-white p-4 rounded shadow">
+                  <h3 className="text-xl font-bold mb-2">Context:</h3>
+                  {serverResponse?.context?.map((context: string, index: number) => (
+                    <div key={index} className="p-2 border rounded mb-2">
+                      {context}
+                    </div>
+                  )) || <div>No context provided.</div>}
+                </div>
+                <div className="mt-4 bg-white p-4 rounded shadow">
+                  <h3 className="text-xl font-bold mb-2">Messages:</h3>
+                  {serverResponse?.messages?.map((message: string, index: number) => (
+                    <div key={index} className="p-2 border rounded mb-2">
+                      {message}
+                    </div>
+                  )) || <div>No messages available.</div>}
+                </div>
+              </>
+            )}
+          </div>
         )}
       </div>
     </div>
