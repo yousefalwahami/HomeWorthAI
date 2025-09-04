@@ -2,6 +2,8 @@
 
 An insurance assistance web app that uses AI vision models and retrieval‑augmented generation (RAG) to help people recognize and document lost belongings from wildfire‑damage photos. The goal is to speed up inventory creation for insurance claims and reduce the emotional/administrative burden after a disaster.
 
+[![YouTube Video Demo](https://img.youtube.com/vi/GxMox4jB9ag/0.jpg)](https://www.youtube.com/watch?v=GxMox4jB9ag)
+
 ---
 
 ## Table of Contents
