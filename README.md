@@ -239,8 +239,6 @@ Open the frontend URL printed in your terminal. Upload a sample wildfire image a
 
 ## Project Structure
 
-> This may vary slightly; adjust to your actual layout.
-
 ```
 HomeWorthAI/
 ├─ frontend/
