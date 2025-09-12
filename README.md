@@ -26,9 +26,7 @@ An insurance assistance web app that uses AI vision models and retrieval‑augme
   - [Run the App](#run-the-app)
   - [Project Structure](#project-structure)
   - [Troubleshooting](#troubleshooting)
-  - [Contributing](#contributing)
-  - [Security \& Privacy](#security--privacy)
-  - [License](#license)
+  - [Appendix](#Appendix)
     - [Appendix: Windows Quick Notes](#appendix-windows-quick-notes)
     - [Appendix: macOS/Linux Quick Notes](#appendix-macoslinux-quick-notes)
 
@@ -291,7 +289,7 @@ HomeWorthAI/
 - Close other heavy apps and increase swap space if needed. You can also try a clean virtualenv.
 
 ---
-
+## Appendix
 
 ### Appendix: Windows Quick Notes
 
